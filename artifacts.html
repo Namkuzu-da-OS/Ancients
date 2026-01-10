@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ancient Artifacts - Ancient History</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/artifacts.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <link rel="stylesheet" href="css/webgl-zen.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>ANCIENT HISTORY</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html#home">HOME</a></li>
+                <li><a href="index.html#timeline">TIMELINE</a></li>
+                <li><a href="#" class="active">ARTIFACTS</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <section id="artifacts">
+            <h2>ANCIENT ARTIFACTS</h2>
+            <p class="subtitle">Explore mysterious and significant artifacts from ancient civilizations.</p>
+            
+            <!-- Filter Controls -->
+            <div class="artifact-filters">
+                <button class="filter-btn active" data-filter="all">All Artifacts</button>
+                <button class="filter-btn" data-filter="mysterious">Mysterious</button>
+                <button class="filter-btn" data-filter="tools">Tools & Weapons</button>
+                <button class="filter-btn" data-filter="art">Art & Symbols</button>
+            </div>
+            
+            <!-- Artifacts Grid -->
+            <div class="artifacts-grid">
+                <!-- Mysterious Handbags -->
+                <div class="artifact-card" data-category="mysterious">
+                    <div class="artifact-image">
+                        <img src="images/Artifacts/Mysterious/handbags.jpg" alt="Ancient Handbag Symbols">
+                        <div class="artifact-overlay">
+                            <span class="view-details">View Details</span>
+                        </div>
+                    </div>
+                    <div class="artifact-info">
+                        <h3>Mysterious Handbag Symbols</h3>
+                        <p class="artifact-era">Multiple Civilizations • 9600 BCE - 500 CE</p>
+                        <p class="artifact-description">Enigmatic handbag-like symbols appear across unconnected ancient civilizations spanning over 10,000 years.</p>
+                        <span class="artifact-tag mysterious">Mysterious</span>
+                    </div>
+                </div>
+                
+                <!-- Egyptian Cartouches -->
+                <div class="artifact-card" data-category="art">
+                    <div class="artifact-image">
+                        <img src="images/Artifacts/Mysterious/Cartouche-obelisk-Hatshepsut-Egypt-Luxor.webp" alt="Cartouche of Hatshepsut">
+                        <div class="artifact-overlay">
+                            <span class="view-details">View Details</span>
+                        </div>
+                    </div>
+                    <div class="artifact-info">
+                        <h3>Egyptian Royal Cartouches</h3>
+                        <p class="artifact-era">Ancient Egypt • 3100-30 BCE</p>
+                        <p class="artifact-description">Oval hieroglyphic inscriptions containing the names of Egyptian pharaohs and royalty.</p>
+                        <span class="artifact-tag art">Art & Symbols</span>
+                    </div>
+                </div>
+                
+                <!-- Bronze Swords -->
+                <div class="artifact-card" data-category="tools">
+                    <div class="artifact-image">
+                        <img src="images/timeline/bronze_age/artifacts/Latenium-epees-bronze.webp" alt="Bronze Age Swords">
+                        <div class="artifact-overlay">
+                            <span class="view-details">View Details</span>
+                        </div>
+                    </div>
+                    <div class="artifact-info">
+                        <h3>Bronze Age Swords</h3>
+                        <p class="artifact-era">Bronze Age • 3000-1200 BCE</p>
+                        <p class="artifact-description">Finely crafted bronze swords demonstrating advanced metallurgy techniques of the Bronze Age.</p>
+                        <span class="artifact-tag tools">Tools & Weapons</span>
+                    </div>
+                </div>
+                
+                <!-- Paleolithic Hand Axe -->
+                <div class="artifact-card" data-category="tools">
+                    <div class="artifact-image">
+                        <img src="images/Artifacts/Tools_Weapons/Early-human-hand-axe-008.jpg" alt="Paleolithic Hand Axe">
+                        <div class="artifact-overlay">
+                            <span class="view-details">View Details</span>
+                        </div>
+                    </div>
+                    <div class="artifact-info">
+                        <h3>Paleolithic Hand Axe</h3>
+                        <p class="artifact-era">Lower Paleolithic • 1.76 million - 130,000 BCE</p>
+                        <p class="artifact-description">Acheulean hand axes represent one of humanity's first standardized tool forms.</p>
+                        <span class="artifact-tag tools">Tools & Weapons</span>
+                    </div>
+                </div>
+                
+                <!-- Venus Figurine -->
+                <div class="artifact-card" data-category="art">
+                    <div class="artifact-image">
+                        <img src="images/Artifacts/Art_Symbols/Newsflash-OriginFigurineVenus-021-575x1024.jpg" alt="Venus Figurine">
+                        <div class="artifact-overlay">
+                            <span class="view-details">View Details</span>
+                        </div>
+                    </div>
+                    <div class="artifact-info">
+                        <h3>Venus Figurines</h3>
+                        <p class="artifact-era">Upper Paleolithic • 35,000-9,000 BCE</p>
+                        <p class="artifact-description">Prehistoric statuettes depicting women, found across Europe and parts of Asia.</p>
+                        <span class="artifact-tag art">Art & Symbols</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Artifact Details Modal -->
+            <div id="artifactModal" class="modal">
+                <div class="modal-content artifact-modal">
+                    <span class="close">&times;</span>
+                    <div class="modal-header">
+                        <h2 id="artifactTitle"></h2>
+                        <p id="artifactEra"></p>
+                    </div>
+                    <div class="modal-body">
+                        <div class="artifact-modal-image" id="imageGalleryContainer">
+                            <img id="artifactModalImage" src="" alt="">
+                            <div class="image-gallery-nav" id="galleryNav" style="display: none;">
+                                <button class="gallery-prev" onclick="changeImage(-1)">❮</button>
+                                <button class="gallery-next" onclick="changeImage(1)">❯</button>
+                                <div class="gallery-dots" id="galleryDots"></div>
+                            </div>
+                        </div>
+                        <div class="artifact-details">
+                            <div class="detail-section">
+                                <h3>Overview</h3>
+                                <p id="artifactOverview"></p>
+                            </div>
+                            <div class="detail-section">
+                                <h3>Historical Context</h3>
+                                <p id="artifactContext"></p>
+                            </div>
+                            <div class="detail-section">
+                                <h3>Significance</h3>
+                                <p id="artifactSignificance"></p>
+                            </div>
+                            <div class="detail-section" id="mysteriesSection" style="display: none;">
+                                <h3>Mysteries & Questions</h3>
+                                <p id="artifactMysteries"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>&copy; 2025 Ancient History Timeline. Exploring the mysteries of our past.</p>
+    </footer>
+    
+    <script src="js/artifacts-data.js"></script>
+    <script src="js/artifacts.js"></script>
+</body>
+</html>

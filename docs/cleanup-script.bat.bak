@@ -1,0 +1,14 @@
+@echo off
+
+REM Cleanup script for redundant documentation files
+echo Removing redundant documentation files...
+
+del "C:\Users\Iccanui\Documents\Projects\test\docs\developer-documentation.md"
+del "C:\Users\Iccanui\Documents\Projects\test\docs\fun-design-ideas.md"
+del "C:\Users\Iccanui\Documents\Projects\test\docs\improvement-plan.md"
+del "C:\Users\Iccanui\Documents\Projects\test\docs\portal-depth-effect.md"
+del "C:\Users\Iccanui\Documents\Projects\test\docs\project-progress.md"
+del "C:\Users\Iccanui\Documents\Projects\test\docs\timeline.md"
+del "C:\Users\Iccanui\Documents\Projects\test\docs\ui-design-decisions.md"
+
+echo Cleanup complete. Files have been removed.
