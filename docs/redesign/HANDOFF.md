@@ -9,9 +9,7 @@ Spec = the four frames in `docs/redesign/mockups/full-res/`. Branch `redesign`; 
 - ✅ 02 Strata art: 8 plates in `images/redesign/strata/` (`prehistoric-alt.webp` is a spare)
 - ⬜ 06 Dial: NOT built (builder ran out of time while reading specs; index.html is still the skeleton). Its NOTES.md entry has the plan + art wishlist. `dial/sky.webp` now exists.
 - 🟡 07 Vault: page built in code (niches, filters, gallery panel, bottom sheet) but 3 of 5 niches render dark in the screenshot (cartouche + swords black, hand axe + Venus dim), so the blank-cartouche bug is NOT fixed yet. Debug that first. Painted background is used but wasn't painted for code-drawn niches on top; may need a re-paint with a plain centre (see NOTES).
-- 🟡 03/04 Descent: built in parallel by three agents in one session, committed as a
-  work-in-progress checkpoint. See their NOTES.md entries for what works and what's left. Not yet reviewed
-  side by side with the frames, so do that before anything else.
+- 🟡 03/04 Descent + event panel: fully coded (pinned strata, parallax, scroll-drawn gold thread + blue branch, gauge, markers, Did You Know, panel with focus trap, deep links `#era` / `#era-NN`), loads with 0 JS errors and all 63 events, but NEVER visually checked. The desktop screenshot is probably blank (6 KB). First job: screenshot it and compare with frame 2.
 - 🟡 Art: in `images/redesign/source/` (gitignored, raw PNGs) → WebP in `images/redesign/`.
   - Done: event 1 (prehistoric/01), `vault/background`, possibly one or two vault niches.
   - Done: `dial/sky` (the painted sky/ruins background). The ring itself is still code-drawn.
