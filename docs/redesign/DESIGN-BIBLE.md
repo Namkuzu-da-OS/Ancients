@@ -124,7 +124,7 @@ gold ornament for blue.
 
 ## Art
 
-All art is painted, generated with the matching frame passed as the reference image on every call. Style
+All art is painted in Daryll's ChatGPT window (the chat that made the frames, so it keeps the look), never by a coding agent. Style
 preamble: *"Cinematic matte painting, deep night and firelight, carved megalithic stone, molten gold light,
 electric blue only for the cosmic and theoretical, hyper-detailed, museum-grade, no text, no UI."*
 

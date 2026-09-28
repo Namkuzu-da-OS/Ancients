@@ -12,7 +12,8 @@
 5. Recreate the frame at high fidelity: composition, painted art, glow, ornament, motion. Never reduce it to a
    generic card layout with a colour theme. If a result looks plainer than the frame, it is not done.
 6. Gold means mainstream, blue means theoretical (or a `mysterious` artifact). Nothing else is blue.
-7. Art: pass the matching frame as the reference image on every generation call, with the bible's style preamble.
-   Illustrate the real event, not the mockup's filler.
+7. **Coding agents never generate images.** All art is made in Daryll's ChatGPT window (Daryll, 2026-09-27)
+   and dropped into `images/redesign/`. If a packet needs art that isn't there yet, use a clearly marked
+   placeholder and say so in NOTES.md.
 8. Static site, no build step, libraries from jsDelivr only. Serve locally with `python -m http.server 8000`.
 9. Never push, publish, or touch `main`. Publishing is Daryll's call.
