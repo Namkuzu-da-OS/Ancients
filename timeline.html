@@ -4,20 +4,20 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#070605">
-    <title>Ancient History — The Dial</title>
+    <title>Ancient History — The Descent</title>
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="css/redesign/tokens.css">
     <link rel="stylesheet" href="css/redesign/base.css">
     <link rel="stylesheet" href="css/redesign/ornament.css">
   </head>
-  <body class="page page--dial">
+  <body class="page page--timeline">
     <header class="site-header">
       <div class="site-header__inner">
         <a class="site-wordmark" href="index.html" aria-label="Ancient History home">ANCIENT HISTORY</a>
         <nav class="site-nav" aria-label="Primary navigation">
           <ul class="site-nav__list">
-            <li><a class="site-nav__link" href="index.html" aria-current="page">HOME</a></li>
-            <li><a class="site-nav__link" href="timeline.html">TIMELINE</a></li>
+            <li><a class="site-nav__link" href="index.html">HOME</a></li>
+            <li><a class="site-nav__link" href="timeline.html" aria-current="page">TIMELINE</a></li>
             <li><a class="site-nav__link" href="artifacts.html">ARTIFACTS</a></li>
           </ul>
         </nav>
@@ -32,14 +32,11 @@
       </div>
     </header>
 
-    <main class="page-stage dial-stage" aria-labelledby="page-title">
-      <h1 id="page-title" class="visually-hidden">The Dial</h1>
-      <aside class="dial-stage__rail placeholder-region" data-slot="era-rail" aria-label="Era rail placeholder"></aside>
-      <section class="dial-stage__dial placeholder-region" data-slot="dial" aria-label="Precession dial placeholder"></section>
-      <aside class="dial-stage__event ornament-frame placeholder-region" data-slot="event-panel" aria-label="Focused event panel placeholder"></aside>
-      <aside class="dial-stage__fact ornament-frame placeholder-region" data-slot="did-you-know" aria-label="Did You Know placeholder"></aside>
-      <aside class="dial-stage__teaser ornament-frame placeholder-region" data-slot="artifacts-teaser" aria-label="Artifacts teaser placeholder"></aside>
-      <div class="dial-stage__scrubber ornament-strip placeholder-region" data-slot="timeline-scrubber" aria-label="Timeline scrubber placeholder"></div>
+    <main class="page-stage timeline-stage" aria-labelledby="page-title">
+      <h1 id="page-title" class="visually-hidden">The Descent</h1>
+      <aside class="timeline-stage__gauge placeholder-region" data-slot="depth-gauge" aria-label="Depth gauge placeholder"></aside>
+      <section class="timeline-stage__strata placeholder-region" data-slot="era-strata" aria-label="Era strata placeholder"></section>
+      <aside class="timeline-stage__panel ornament-frame placeholder-region" data-slot="event-panel" aria-label="Event detail panel placeholder"></aside>
     </main>
 
     <script type="module" src="js/redesign/data.js"></script>
