@@ -7,7 +7,8 @@ Spec = the four frames in `docs/redesign/mockups/full-res/`. Branch `redesign`; 
 - ✅ 00 Content lock (`tools/verify-content.mjs`, run before every commit)
 - ✅ 01 Foundation (Codex)
 - ✅ 02 Strata art: 8 plates in `images/redesign/strata/` (`prehistoric-alt.webp` is a spare)
-- 🟡 03/04 Descent, 06 Dial, 07 Vault: built in parallel by three agents in one session, committed as a
+- ⬜ 06 Dial: NOT built (builder ran out of time while reading specs; index.html is still the skeleton). Its NOTES.md entry has the plan + art wishlist. `dial/sky.webp` now exists.
+- 🟡 03/04 Descent, 07 Vault: built in parallel by three agents in one session, committed as a
   work-in-progress checkpoint. See their NOTES.md entries for what works and what's left. Not yet reviewed
   side by side with the frames, so do that before anything else.
 - 🟡 Art: in `images/redesign/source/` (gitignored, raw PNGs) → WebP in `images/redesign/`.
