@@ -1,0 +1,1776 @@
+/* ==========================================================================
+   The Artifact Vault (frame 3)
+   A torch-lit museum vault carved in rock. Everything here is scoped to
+   .page--artifacts / .vault-*; shared tokens, header and ornament live in
+   tokens.css, base.css and ornament.css and are not edited.
+   ========================================================================== */
+
+.page--artifacts {
+  /* Code-rendered rock: fractal noise lit by a low torch, stitched so it tiles. */
+  --vault-rock: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='560'%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.0105 .017' numOctaves='6' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.5 0 0 0 -.25'/%3E%3CfeDiffuseLighting surfaceScale='9' diffuseConstant='1.1' lighting-color='%23ffdcae'%3E%3CfeDistantLight azimuth='250' elevation='40'/%3E%3C/feDiffuseLighting%3E%3CfeColorMatrix type='matrix' values='.46 0 0 0 .012 0 .3 0 0 .006 0 0 .17 0 0 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='560' height='560' filter='url(%23f)'/%3E%3C/svg%3E");
+  /* Finer chisel grain for carved, dressed surfaces (facade, pillars, plaques). */
+  --vault-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.028 .05' numOctaves='5' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.3 0 0 0 -.15'/%3E%3CfeDiffuseLighting surfaceScale='3.2' diffuseConstant='1.05' lighting-color='%23ffd9a6'%3E%3CfeDistantLight azimuth='255' elevation='48'/%3E%3C/feDiffuseLighting%3E%3CfeColorMatrix type='matrix' values='.5 0 0 0 .01 0 .33 0 0 .005 0 0 .19 0 0 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)'/%3E%3C/svg%3E");
+  --vault-torch: 255 178 92;
+  --vault-torch-hot: 255 222 160;
+  --vault-azure: 70 150 226;
+  --vault-azure-hot: 159 216 255;
+  --vault-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* The header floats over the cave on this page, as in the frame. */
+.page--artifacts .site-header {
+  border-bottom-color: transparent;
+  background: linear-gradient(180deg, rgb(7 6 5 / 74%), rgb(7 6 5 / 34%) 72%, transparent);
+  box-shadow: none;
+}
+
+.vault-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Carved relief: grey shapes lit by the SVG filter, laid over rock with overlay. */
+.vault-relief {
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.vault-relief use {
+  fill: #9a9a9a;
+  filter: url("#vf-relief");
+}
+
+/* --------------------------------------------------------------------------
+   Stage layout
+   -------------------------------------------------------------------------- */
+
+.page--artifacts .vault-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(330px, 25.6vw, 430px);
+  grid-template-rows: 48px minmax(0, 1fr);
+  gap: 16px 26px;
+  height: calc(100svh - var(--header-height));
+  min-height: 640px;
+  padding: 14px 24px 18px;
+  overflow: visible;
+  background: none;
+}
+
+.page--artifacts .vault-stage::after {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   The cave (fixed backdrop)
+   -------------------------------------------------------------------------- */
+
+.vault-scene {
+  position: fixed;
+  z-index: -2;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #0a0705;
+}
+
+.vault-scene__sky {
+  position: absolute;
+  top: 0;
+  left: 14%;
+  width: 72%;
+  height: 40%;
+  background:
+    radial-gradient(ellipse 60% 22% at 38% 42%, rgb(170 150 210 / 18%), transparent 70%),
+    linear-gradient(162deg, transparent 30%, rgb(214 196 255 / 9%) 44%, rgb(255 222 180 / 12%) 50%, rgb(160 180 255 / 7%) 57%, transparent 70%),
+    radial-gradient(ellipse at 50% 100%, #1d1622, #0b0b18 60%, #05060c);
+}
+
+.vault-scene__stars {
+  width: 100%;
+  height: 100%;
+}
+
+.vault-scene__rock {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 34% 30% at 12% 86%, rgb(var(--vault-torch) / 26%), transparent 70%),
+    radial-gradient(ellipse 30% 26% at 70% 88%, rgb(var(--vault-torch) / 20%), transparent 70%),
+    radial-gradient(ellipse 42% 36% at 44% 30%, rgb(var(--vault-torch) / 13%), transparent 72%),
+    linear-gradient(180deg, rgb(7 6 5 / 30%), transparent 30%, transparent 70%, rgb(7 6 5 / 55%)),
+    var(--vault-rock) 0 0 / 560px 560px,
+    #2a190d;
+  background-blend-mode: screen, screen, screen, normal, normal, normal;
+  /* The cave mouth: a jagged opening to the night sky behind the wordmark. */
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath fill-rule='evenodd' d='M0 0H100V100H0Z M24 0 L26 3 L25 6 L28 9 L27 12 L31 14 L33 18 L37 17 L40 21 L44 20 L47 24 L51 22 L54 25 L57 21 L61 22 L63 18 L67 17 L69 13 L72 12 L71 8 L74 6 L73 3 L75 0 Z'/%3E%3C/svg%3E");
+  mask-size: 100% 100%;
+}
+
+.vault-scene__painted {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background-position: center;
+  background-size: cover;
+  transition: opacity 900ms ease;
+}
+
+.vault-stage.has-painted-bg .vault-scene__painted {
+  opacity: 1;
+}
+
+.vault-stage.has-painted-bg :is(.vault-scene__rock, .vault-wall, .vault-stairs, .vault-floor, .vault-brazier) {
+  display: none;
+}
+
+/* Side walls: stacked megalith blocks with animal reliefs, lit from below. */
+.vault-wall {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: clamp(120px, 12.4vw, 236px);
+  background:
+    radial-gradient(ellipse 120% 40% at 30% 92%, rgb(var(--vault-torch) / 34%), transparent 70%),
+    radial-gradient(ellipse 120% 30% at 60% 40%, rgb(var(--vault-torch) / 20%), transparent 70%),
+    linear-gradient(90deg, rgb(0 0 0 / 10%), rgb(255 190 120 / 6%) 40%, rgb(0 0 0 / 60%)),
+    var(--vault-grain) 0 0 / 300px 300px,
+    var(--vault-rock) 120px 40px / 560px 560px,
+    #3a2412;
+  background-blend-mode: screen, screen, normal, soft-light, normal, normal;
+}
+
+.vault-wall--left {
+  left: 0;
+  clip-path: polygon(0 0, 92% 0, 96% 6%, 93% 14%, 100% 22%, 95% 33%, 98% 45%, 94% 58%, 100% 67%, 95% 79%, 99% 90%, 94% 100%, 0 100%);
+  box-shadow: inset -30px 0 40px rgb(0 0 0 / 70%);
+}
+
+.vault-wall--right {
+  right: 0;
+  clip-path: polygon(8% 0, 100% 0, 100% 100%, 4% 100%, 9% 88%, 2% 74%, 7% 60%, 0 46%, 6% 30%, 1% 16%);
+}
+
+.vault-wall__blocks {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: rgb(0 0 0 / 70%);
+  stroke-width: 3;
+  filter: drop-shadow(0 1.5px 0 rgb(255 196 128 / 22%));
+}
+
+.vault-wall__reliefs {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.vault-wall__edge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgb(0 0 0 / 55%));
+}
+
+.vault-stairs {
+  position: absolute;
+  bottom: 0;
+  left: clamp(90px, 9vw, 180px);
+  width: clamp(180px, 17vw, 320px);
+  height: auto;
+  aspect-ratio: 320 / 420;
+  opacity: 0.95;
+}
+
+.vault-stairs__candles circle {
+  fill: #ffd68a;
+  filter: drop-shadow(0 0 3px #ffb45c) drop-shadow(0 0 7px rgb(255 150 60 / 70%));
+}
+
+.vault-floor {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 24%;
+  background:
+    radial-gradient(ellipse 36% 60% at 40% 40%, rgb(var(--vault-torch) / 18%), transparent 70%),
+    linear-gradient(180deg, rgb(10 7 5 / 0%), rgb(10 7 5 / 60%) 16%, rgb(24 15 8 / 90%) 40%, rgb(7 6 5 / 96%)),
+    var(--vault-rock) 0 0 / 420px 180px;
+  background-blend-mode: screen, normal, normal;
+  perspective: 700px;
+}
+
+.vault-floor__disc {
+  position: absolute;
+  bottom: -46%;
+  left: 38%;
+  width: min(62vw, 980px);
+  aspect-ratio: 1;
+  transform: translateX(-50%) rotateX(76deg);
+  transform-origin: 50% 50%;
+  fill: none;
+  stroke: rgb(var(--vault-torch) / 58%);
+  stroke-width: 1.4;
+  filter: drop-shadow(0 0 4px rgb(var(--vault-torch) / 80%));
+}
+
+.vault-floor__glyphs circle {
+  fill: rgb(var(--vault-torch) / 55%);
+}
+
+/* Braziers flanking the vault on the floor */
+.vault-brazier {
+  position: absolute;
+  bottom: 3.5%;
+  width: 70px;
+  height: 118px;
+}
+
+.vault-brazier--left {
+  left: clamp(160px, 13vw, 260px);
+}
+
+.vault-brazier--right {
+  left: calc(100vw - clamp(330px, 25.6vw, 430px) - 104px);
+}
+
+.vault-brazier__bowl {
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  width: 70px;
+  height: 22px;
+  transform: translateX(-50%);
+  border-radius: 4px 4px 40px 40px;
+  background: linear-gradient(180deg, #7a4a1f, #2a170b 60%, #120a05);
+  box-shadow: 0 -2px 10px rgb(255 170 80 / 50%), inset 0 2px 0 rgb(255 210 140 / 45%);
+}
+
+.vault-brazier__stand {
+  position: absolute;
+  top: 70px;
+  left: 50%;
+  width: 46px;
+  height: 48px;
+  transform: translateX(-50%);
+  clip-path: polygon(40% 0, 60% 0, 62% 70%, 100% 100%, 0 100%, 38% 70%);
+  background: linear-gradient(90deg, #1a0f07, #5a361a 45%, #140b05);
+}
+
+/* Flames: three stacked tongues, each with its own rhythm. */
+.vault-flame {
+  position: absolute;
+  left: 50%;
+  display: block;
+  width: 26px;
+  height: 46px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.vault-flame::before {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  width: 420%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  content: "";
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgb(var(--vault-torch) / 42%), rgb(var(--vault-torch) / 12%) 40%, transparent 70%);
+  mix-blend-mode: screen;
+  animation: vault-flicker var(--flick, 2.6s) ease-in-out infinite alternate;
+}
+
+.vault-flame i {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 50% 50% 46% 46% / 72% 72% 28% 28%;
+  transform-origin: 50% 100%;
+  translate: -50% 0;
+  animation: vault-lick 1.4s ease-in-out infinite alternate;
+}
+
+.vault-flame i:nth-child(1) {
+  background: radial-gradient(ellipse 50% 60% at 50% 72%, rgb(255 150 50 / 95%), rgb(230 80 20 / 70%) 55%, transparent 76%);
+  filter: blur(1.4px);
+}
+
+.vault-flame i:nth-child(2) {
+  width: 70%;
+  height: 78%;
+  background: radial-gradient(ellipse 50% 60% at 50% 72%, #ffe09a, rgb(255 170 60 / 90%) 55%, transparent 78%);
+  filter: blur(0.8px);
+  animation-duration: 1.05s;
+  animation-delay: -0.4s;
+}
+
+.vault-flame i:nth-child(3) {
+  width: 38%;
+  height: 46%;
+  background: radial-gradient(ellipse 50% 60% at 50% 70%, #fffbe8, #ffe6a8 55%, transparent 80%);
+  animation-duration: 0.8s;
+  animation-delay: -0.2s;
+}
+
+.vault-flame--big {
+  top: -2px;
+  width: 44px;
+  height: 64px;
+}
+
+.vault-flame--big::before {
+  width: 640%;
+}
+
+.vault-flame.is-azure::before {
+  background: radial-gradient(circle, rgb(var(--vault-azure) / 46%), rgb(var(--vault-azure) / 14%) 40%, transparent 70%);
+}
+
+.vault-flame.is-azure i:nth-child(1) {
+  background: radial-gradient(ellipse 50% 60% at 50% 72%, rgb(70 150 226 / 95%), rgb(30 80 200 / 70%) 55%, transparent 76%);
+}
+
+.vault-flame.is-azure i:nth-child(2) {
+  background: radial-gradient(ellipse 50% 60% at 50% 72%, #cdeeff, rgb(120 190 250 / 90%) 55%, transparent 78%);
+}
+
+.vault-scene__glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 22% 26% at 14% 88%, rgb(var(--vault-torch) / 30%), transparent 70%),
+    radial-gradient(ellipse 20% 24% at 68% 88%, rgb(var(--vault-torch) / 24%), transparent 70%);
+  mix-blend-mode: screen;
+  animation: vault-flicker 3.4s ease-in-out infinite alternate;
+}
+
+.vault-scene__embers {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.vault-scene__vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 75% at 44% 52%, transparent 55%, rgb(5 4 3 / 70%)),
+    linear-gradient(180deg, rgb(5 4 3 / 20%), transparent 20%);
+}
+
+/* --------------------------------------------------------------------------
+   Filter strip
+   -------------------------------------------------------------------------- */
+
+.vault-filters {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  width: min(100%, 700px);
+  height: 46px;
+  align-items: center;
+  justify-self: center;
+  gap: 0;
+  padding: 5px;
+  margin-left: clamp(0px, 8vw, 150px);
+  border: 1px solid var(--hairline);
+  border-radius: 3px;
+  background:
+    linear-gradient(180deg, rgb(58 42 27 / 22%), transparent),
+    rgb(9 7 5 / 90%);
+  box-shadow:
+    inset 0 0 0 4px rgb(7 6 5 / 90%),
+    inset 0 0 0 5px var(--hairline-faint),
+    0 10px 28px rgb(0 0 0 / 60%),
+    0 0 26px rgb(var(--vault-torch) / 10%);
+}
+
+.vault-filters::before,
+.vault-filters::after {
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--gold);
+  content: "";
+  background: var(--rock);
+  transform: translateY(-50%) rotate(45deg);
+  box-shadow: var(--gold-glow);
+}
+
+.vault-filters::before {
+  left: -5px;
+}
+
+.vault-filters::after {
+  right: -5px;
+}
+
+.vault-filter {
+  position: relative;
+  display: flex;
+  height: 100%;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--parchment);
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.vault-filter + .vault-filter::before {
+  position: absolute;
+  top: 22%;
+  bottom: 22%;
+  left: -1px;
+  width: 1px;
+  content: "";
+  background: linear-gradient(180deg, transparent, var(--gold), transparent);
+}
+
+.vault-filter[aria-pressed="true"] + .vault-filter::before,
+.vault-filter[aria-pressed="true"]::before {
+  opacity: 0;
+}
+
+.vault-filter:hover {
+  color: var(--gold-hot);
+}
+
+.vault-filter[aria-pressed="true"] {
+  border-color: var(--gold-hot);
+  color: var(--gold-hot);
+  background:
+    radial-gradient(ellipse at 50% 120%, rgb(var(--vault-torch) / 36%), transparent 70%),
+    linear-gradient(180deg, rgb(58 42 27 / 70%), rgb(20 14 9 / 90%));
+  box-shadow: inset 0 0 12px rgb(var(--vault-torch) / 26%), var(--gold-glow);
+  text-shadow: 0 0 10px rgb(255 213 138 / 60%);
+}
+
+.vault-filter[data-filter="mysterious"][aria-pressed="true"] {
+  border-color: var(--blue-hot);
+  color: var(--blue-hot);
+  background:
+    radial-gradient(ellipse at 50% 120%, rgb(var(--vault-azure) / 40%), transparent 70%),
+    linear-gradient(180deg, rgb(14 28 48 / 80%), rgb(6 10 18 / 92%));
+  box-shadow: inset 0 0 12px rgb(var(--vault-azure) / 30%), var(--blue-glow);
+  text-shadow: 0 0 10px rgb(159 216 255 / 60%);
+}
+
+.vault-filter:focus-visible {
+  outline: 1px solid var(--gold-hot);
+  outline-offset: 3px;
+}
+
+/* --------------------------------------------------------------------------
+   The facade: carved vault wall with niches
+   -------------------------------------------------------------------------- */
+
+.vault-hall {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  min-height: 0;
+  justify-content: flex-end;
+  padding-bottom: clamp(40px, 7vh, 78px);
+}
+
+.vault-facade {
+  position: relative;
+  display: grid;
+  width: min(100% - clamp(0px, 9vw, 150px), 1060px);
+  min-height: 0;
+  grid-template-rows: 34px minmax(0, 1fr) 26px;
+  margin-right: auto;
+  margin-left: auto;
+  translate: clamp(0px, 4.5vw, 75px) 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgb(var(--vault-torch) / 18%), transparent 70%),
+    linear-gradient(90deg, rgb(0 0 0 / 55%), transparent 8%, transparent 92%, rgb(0 0 0 / 55%)),
+    var(--vault-grain) 0 0 / 300px 300px,
+    var(--vault-rock) 40px 0 / 560px 560px,
+    #3b2413;
+  background-blend-mode: screen, normal, soft-light, normal, normal;
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 80%),
+    0 30px 60px rgb(0 0 0 / 70%),
+    -30px 0 50px rgb(0 0 0 / 50%),
+    30px 0 50px rgb(0 0 0 / 50%);
+}
+
+.vault-facade__lintel {
+  position: relative;
+  border-bottom: 2px solid rgb(0 0 0 / 70%);
+  background:
+    linear-gradient(180deg, rgb(255 196 128 / 18%), transparent 30%, rgb(0 0 0 / 40%)),
+    var(--vault-grain) 60px 0 / 300px 300px,
+    #4a2e18;
+  background-blend-mode: normal, soft-light, normal;
+  box-shadow: 0 1px 0 rgb(255 196 128 / 18%);
+}
+
+.vault-facade__frieze {
+  position: absolute;
+  inset: 3px 16px;
+  width: calc(100% - 32px);
+  height: calc(100% - 6px);
+}
+
+.vault-facade__rows {
+  display: grid;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+  padding: 16px 0 10px;
+}
+
+.vault-facade__base {
+  border-top: 2px solid rgb(255 196 128 / 22%);
+  background:
+    linear-gradient(180deg, rgb(255 190 110 / 22%), rgb(0 0 0 / 50%)),
+    var(--vault-grain) 0 0 / 300px 300px,
+    #3a2412;
+  background-blend-mode: normal, soft-light, normal;
+  box-shadow: 0 20px 40px rgb(0 0 0 / 80%);
+}
+
+.vault-hall__status {
+  align-self: center;
+  margin: 0;
+  color: var(--ash);
+  font-family: var(--font-display);
+  letter-spacing: 0.12em;
+  text-align: center;
+}
+
+.vault-row {
+  display: grid;
+  min-height: 0;
+  align-items: stretch;
+}
+
+.vault-row--upper {
+  grid-template-columns: 52px minmax(0, 1fr) 52px minmax(0, 1fr) 52px minmax(0, 1fr) 52px;
+}
+
+.vault-row--lower {
+  grid-template-columns: minmax(0, 0.62fr) 52px minmax(0, 1.4fr) 52px minmax(0, 1.4fr) 52px minmax(0, 0.62fr);
+}
+
+.vault-row--single {
+  grid-template-columns: 52px minmax(0, 1fr) 52px;
+}
+
+/* Pillars: dressed stone with a column of carved glyphs and a wall sconce. */
+.vault-pillar {
+  position: relative;
+  margin: -16px 0 -10px;
+  background:
+    linear-gradient(90deg, rgb(0 0 0 / 70%), rgb(255 200 140 / 16%) 22%, rgb(255 200 140 / 6%) 55%, rgb(0 0 0 / 65%)),
+    var(--vault-grain) 30px 0 / 300px 300px,
+    #4b2e17;
+  background-blend-mode: normal, soft-light, normal;
+  box-shadow: inset 0 14px 0 rgb(0 0 0 / 25%), inset 0 -14px 0 rgb(0 0 0 / 25%);
+}
+
+.vault-pillar::before,
+.vault-pillar::after {
+  position: absolute;
+  right: -5px;
+  left: -5px;
+  height: 12px;
+  content: "";
+  background: linear-gradient(180deg, #6a4222, #2a180b);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 70%), inset 0 1px 0 rgb(255 210 150 / 30%);
+}
+
+.vault-pillar::before {
+  top: 16px;
+}
+
+.vault-pillar::after {
+  bottom: 10px;
+}
+
+.vault-pillar__glyphs {
+  position: absolute;
+  inset: 40px 8px 34px;
+  width: calc(100% - 16px);
+  height: calc(100% - 74px);
+}
+
+.vault-sconce {
+  position: absolute;
+  top: 36%;
+  left: 50%;
+  z-index: 2;
+  width: 16px;
+  height: 22px;
+  transform: translateX(-50%);
+  border-radius: 2px 2px 8px 8px;
+  background: linear-gradient(180deg, #8a5a28, #2a1709);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 60%);
+}
+
+.vault-sconce .vault-flame {
+  top: -30px;
+  width: 16px;
+  height: 30px;
+}
+
+/* Blank carved wall at the ends of the lower gallery */
+.vault-bay {
+  position: relative;
+  margin: -16px 0 -10px;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 60%, rgb(var(--vault-torch) / 12%), transparent 70%),
+    var(--vault-grain) 0 0 / 300px 300px,
+    #3c2513;
+  background-blend-mode: screen, soft-light, normal;
+  box-shadow: inset 0 0 30px rgb(0 0 0 / 60%);
+}
+
+.vault-bay__relief {
+  position: absolute;
+  inset: 10% 8%;
+  width: 84%;
+  height: 80%;
+}
+
+/* --------------------------------------------------------------------------
+   Niches
+   -------------------------------------------------------------------------- */
+
+.niche {
+  --n-light: var(--vault-torch);
+  --n-hot: var(--vault-torch-hot);
+  --n-line: var(--gold);
+  --n-line-hot: var(--gold-hot);
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 0 6px;
+  border: 0;
+  color: var(--parchment);
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  text-align: center;
+  transition: opacity 600ms ease;
+}
+
+.niche.is-mysterious {
+  --n-light: var(--vault-azure);
+  --n-hot: var(--vault-azure-hot);
+  --n-line: var(--blue);
+  --n-line-hot: var(--blue-hot);
+}
+
+.niche__arch {
+  position: relative;
+  display: block;
+  min-height: 0;
+  padding: 11px;
+  border-radius: 48% 48% 4px 4px / 64px 64px 4px 4px;
+  background:
+    linear-gradient(135deg, rgb(255 206 150 / 26%), transparent 36%, transparent 64%, rgb(0 0 0 / 60%)),
+    var(--vault-grain) 0 0 / 300px 300px,
+    #54331a;
+  background-blend-mode: normal, soft-light, normal;
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 80%),
+    0 10px 24px rgb(0 0 0 / 60%),
+    inset 0 1px 0 rgb(255 214 160 / 32%);
+}
+
+.niche__recess {
+  position: absolute;
+  inset: 11px;
+  display: block;
+  overflow: hidden;
+  border-radius: 46% 46% 2px 2px / 56px 56px 2px 2px;
+  background:
+    radial-gradient(ellipse 70% 58% at 50% 6%, rgb(var(--n-light) / 30%), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 50% 92%, rgb(var(--n-light) / 20%), transparent 70%),
+    var(--vault-rock) 0 0 / 360px 360px,
+    #1d1109;
+  background-blend-mode: screen, screen, normal, normal;
+  box-shadow:
+    inset 0 22px 34px rgb(0 0 0 / 86%),
+    inset 14px 0 26px rgb(0 0 0 / 60%),
+    inset -14px 0 26px rgb(0 0 0 / 60%);
+}
+
+/* Inner hairline that follows the arch */
+.niche__recess::after {
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgb(var(--n-light) / 45%);
+  border-bottom: 0;
+  border-radius: inherit;
+  content: "";
+  box-shadow: 0 0 10px rgb(var(--n-light) / 18%);
+}
+
+.niche__lights {
+  position: absolute;
+  inset: 0;
+  display: block;
+  opacity: 1;
+  transition: opacity 1100ms var(--vault-ease), filter 600ms ease;
+}
+
+.niche__lamp {
+  position: absolute;
+  top: 7%;
+  left: 50%;
+  width: 26px;
+  height: 7px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: rgb(var(--n-hot));
+  box-shadow: 0 0 10px 3px rgb(var(--n-hot) / 90%), 0 0 40px 14px rgb(var(--n-light) / 55%);
+}
+
+.niche__cone {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  width: 92%;
+  height: 90%;
+  transform: translateX(-50%);
+  clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%);
+  background: linear-gradient(180deg, rgb(var(--n-hot) / 40%), rgb(var(--n-light) / 16%) 55%, rgb(var(--n-light) / 4%));
+  mix-blend-mode: screen;
+  filter: blur(6px);
+  animation: vault-flicker var(--flick, 3.1s) ease-in-out infinite alternate;
+}
+
+.niche__halo {
+  position: absolute;
+  bottom: 14%;
+  left: 50%;
+  width: 86%;
+  height: 74%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 60%, rgb(var(--n-light) / 44%), rgb(var(--n-light) / 12%) 45%, transparent 70%);
+  mix-blend-mode: screen;
+}
+
+/* The object on its plinth */
+.niche__display {
+  position: absolute;
+  right: 8%;
+  bottom: 17%;
+  left: 8%;
+  top: 17%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transition: transform 500ms var(--vault-ease), filter 600ms ease;
+}
+
+.niche__object {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* Photographed on black: the black drops away and the object floats in the light. */
+.niche__display--float .niche__object {
+  height: 100%;
+  width: auto;
+  mix-blend-mode: lighten;
+  filter: sepia(0.22) saturate(1.15) contrast(1.08) brightness(1.08) drop-shadow(0 0 18px rgb(var(--n-light) / 45%));
+  -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 70%, transparent 100%);
+  mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 70%, transparent 100%);
+}
+
+.niche__display--float.is-cropped .niche__object {
+  aspect-ratio: 0.62;
+  object-fit: cover;
+  object-position: var(--crop, 50% 50%);
+}
+
+/* Relief photographs set into the niche as carved slabs */
+.niche__slab {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: #2a1d12;
+  box-shadow:
+    0 8px 16px rgb(0 0 0 / 70%),
+    0 0 26px rgb(var(--n-light) / 30%),
+    inset 0 0 0 1px rgb(255 220 170 / 14%);
+}
+
+.niche__slab .niche__object {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.niche__slab::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    linear-gradient(180deg, rgb(var(--n-hot) / 26%), transparent 45%, rgb(0 0 0 / 50%)),
+    radial-gradient(ellipse at 50% 30%, transparent 40%, rgb(0 0 0 / 50%));
+  mix-blend-mode: normal;
+}
+
+.niche__display--stele .niche__slab {
+  height: 100%;
+  aspect-ratio: 0.72;
+  border-radius: 36% 36% 3px 3px / 16% 16% 3px 3px;
+}
+
+.niche__display--stele .niche__object {
+  filter: sepia(0.35) saturate(1.2) brightness(0.95) contrast(1.1);
+  object-position: 50% 45%;
+}
+
+.niche__display--triptych {
+  gap: 4%;
+  align-items: flex-end;
+}
+
+.niche__display--triptych .niche__slab {
+  clip-path: polygon(2% 6%, 12% 0, 30% 3%, 52% 0, 74% 4%, 92% 1%, 100% 8%, 98% 40%, 100% 72%, 97% 100%, 3% 100%, 0 70%, 2% 38%);
+}
+
+.niche__display--triptych .niche__slab--main {
+  width: 62%;
+  height: 86%;
+}
+
+.niche__display--triptych .niche__slab--side {
+  width: 20%;
+  height: 52%;
+}
+
+.niche__display--triptych .niche__object {
+  filter: grayscale(0.55) sepia(0.15) brightness(0.9) contrast(1.15);
+}
+
+.niche.is-mysterious .niche__display--triptych .niche__object {
+  filter: grayscale(0.8) brightness(0.88) contrast(1.2) sepia(0.1) hue-rotate(170deg) saturate(0.7);
+}
+
+/* A glass vitrine on the plinth for objects photographed on a colour ground */
+.niche__vitrine {
+  position: relative;
+  display: block;
+  height: 100%;
+  aspect-ratio: 0.66;
+  padding: 5px;
+  border: 1px solid rgb(var(--n-line-hot) / 0);
+  background: linear-gradient(90deg, #5a3a1c, #a8783c 30%, #5a3a1c 60%, #2a190c);
+  box-shadow: 0 10px 18px rgb(0 0 0 / 70%), 0 0 24px rgb(var(--n-light) / 30%);
+}
+
+.niche__vitrine .niche__object {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 40%;
+  filter: sepia(0.72) saturate(1.25) hue-rotate(-12deg) brightness(0.92) contrast(1.12);
+}
+
+.niche__vitrine::after {
+  position: absolute;
+  inset: 5px;
+  content: "";
+  background:
+    linear-gradient(115deg, rgb(255 240 210 / 20%), transparent 26%, transparent 60%, rgb(255 240 210 / 10%) 64%, transparent 70%),
+    radial-gradient(ellipse at 50% 0%, rgb(var(--n-hot) / 26%), transparent 60%),
+    linear-gradient(180deg, transparent 60%, rgb(0 0 0 / 45%));
+}
+
+/* A painted niche render, when one exists, replaces the object presentation. */
+.niche__display--painted .niche__object {
+  height: 100%;
+  width: auto;
+  mix-blend-mode: lighten;
+}
+
+.niche__plinth {
+  position: absolute;
+  bottom: 7%;
+  left: 50%;
+  width: 60%;
+  height: 11%;
+  transform: translateX(-50%);
+  background:
+    linear-gradient(180deg, rgb(var(--n-hot) / 55%) 0 2px, #5b3a1e 2px, #2b190c 60%, #150c06),
+    #3a2412;
+  box-shadow: 0 -6px 18px rgb(var(--n-light) / 26%), 0 8px 14px rgb(0 0 0 / 80%);
+}
+
+.niche__plinth::before {
+  position: absolute;
+  top: 36%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border: 1px solid rgb(var(--n-hot) / 80%);
+  content: "";
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.niche__step {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 84%;
+  height: 7%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, rgb(var(--n-hot) / 30%) 0 1px, #3c2513 1px, #140b05);
+}
+
+.niche__candle {
+  position: absolute;
+  bottom: 7%;
+  width: 7px;
+  height: 18px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #f3e2bc, #b89a6a);
+}
+
+.niche__candle--l {
+  left: 10%;
+}
+
+.niche__candle--r {
+  right: 10%;
+}
+
+.niche__candle .vault-flame {
+  top: -15px;
+  width: 8px;
+  height: 15px;
+}
+
+.niche__candle .vault-flame::before {
+  width: 700%;
+}
+
+/* Label plaque with diamond terminals, as in the frame */
+.niche__plaque {
+  position: relative;
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  width: min(84%, 260px);
+  margin: 0 auto;
+  padding: 10px 18px;
+  border: 1px solid rgb(var(--n-light) / 50%);
+  background:
+    linear-gradient(180deg, rgb(58 42 27 / 40%), rgb(7 6 5 / 94%)),
+    #0d0906;
+  box-shadow:
+    inset 0 0 0 3px rgb(7 6 5 / 90%),
+    inset 0 0 0 4px rgb(var(--n-light) / 16%),
+    0 8px 18px rgb(0 0 0 / 70%);
+  transition: box-shadow 300ms ease, border-color 300ms ease, opacity 600ms ease;
+}
+
+.niche__plaque::before,
+.niche__plaque::after {
+  position: absolute;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border: 1px solid rgb(var(--n-hot));
+  content: "";
+  background: #0d0906;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.niche__plaque::before {
+  top: -5px;
+}
+
+.niche__plaque::after {
+  bottom: -5px;
+}
+
+.niche__title {
+  display: block;
+  color: var(--parchment);
+  font-family: var(--font-display);
+  font-size: clamp(0.72rem, 0.82vw, 0.86rem);
+  line-height: 1.35;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px #000;
+  transition: color 250ms ease, text-shadow 250ms ease;
+}
+
+.niche.is-mysterious .niche__title {
+  color: var(--blue-hot);
+  text-shadow: 0 0 10px rgb(var(--vault-azure) / 60%);
+}
+
+/* Hover, focus, selection */
+.niche:hover .niche__display,
+.niche:focus-visible .niche__display {
+  transform: translateY(-3px);
+}
+
+.niche:hover .niche__halo,
+.niche:focus-visible .niche__halo {
+  filter: brightness(1.3);
+}
+
+.niche:hover .niche__title {
+  color: var(--gold-hot);
+}
+
+.niche.is-mysterious:hover .niche__title {
+  color: #fff;
+}
+
+.niche:focus-visible {
+  outline: none;
+}
+
+.niche:focus-visible .niche__plaque {
+  outline: 1px solid rgb(var(--n-hot));
+  outline-offset: 4px;
+}
+
+.niche[aria-pressed="true"] .niche__arch {
+  box-shadow:
+    0 0 0 1px rgb(var(--n-hot) / 70%),
+    0 0 26px rgb(var(--n-light) / 45%),
+    0 10px 24px rgb(0 0 0 / 60%),
+    inset 0 1px 0 rgb(255 214 160 / 32%);
+}
+
+.niche[aria-pressed="true"] .niche__plaque {
+  border-color: rgb(var(--n-hot) / 90%);
+  box-shadow:
+    inset 0 0 0 3px rgb(7 6 5 / 90%),
+    inset 0 0 0 4px rgb(var(--n-light) / 30%),
+    0 0 18px rgb(var(--n-light) / 40%),
+    0 8px 18px rgb(0 0 0 / 70%);
+}
+
+.niche[aria-pressed="true"] .niche__title {
+  color: rgb(var(--n-hot));
+  text-shadow: 0 0 10px rgb(var(--n-light) / 70%);
+}
+
+/* Filtered out: the niche's lights go dark */
+.niche.is-dimmed {
+  cursor: default;
+}
+
+.niche.is-dimmed .niche__lights {
+  opacity: 0.06;
+}
+
+.niche.is-dimmed .niche__display {
+  filter: brightness(0.22) grayscale(0.6);
+}
+
+.niche.is-dimmed .niche__plaque {
+  opacity: 0.4;
+}
+
+/* The orchestrated entrance: torches catch one after another */
+.vault-stage:not(.is-lit) .niche__lights {
+  opacity: 0;
+}
+
+.vault-stage:not(.is-lit) .niche__display {
+  filter: brightness(0.2);
+}
+
+.vault-stage.is-lit .niche__lights {
+  transition-delay: calc(var(--i, 0) * 170ms + 150ms);
+}
+
+.vault-stage.is-lit .niche__display {
+  transition: transform 500ms var(--vault-ease), filter 1100ms var(--vault-ease) calc(var(--i, 0) * 170ms + 250ms);
+}
+
+.niche__object.is-missing {
+  visibility: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   Detail panel
+   -------------------------------------------------------------------------- */
+
+.page--artifacts .vault-panel {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  min-height: 0;
+  max-height: 100%;
+  flex-direction: column;
+  grid-column: 2;
+  grid-row: 1 / -1;
+  margin-top: -8px;
+  overflow: hidden;
+  background:
+    linear-gradient(var(--gold), var(--gold)) left 7px top 7px / 20px 1px no-repeat,
+    linear-gradient(var(--gold), var(--gold)) left 7px top 7px / 1px 20px no-repeat,
+    linear-gradient(var(--gold), var(--gold)) right 7px top 7px / 20px 1px no-repeat,
+    linear-gradient(var(--gold), var(--gold)) right 7px top 7px / 1px 20px no-repeat,
+    linear-gradient(var(--gold), var(--gold)) left 7px bottom 7px / 20px 1px no-repeat,
+    linear-gradient(var(--gold), var(--gold)) left 7px bottom 7px / 1px 20px no-repeat,
+    linear-gradient(var(--gold), var(--gold)) right 7px bottom 7px / 20px 1px no-repeat,
+    linear-gradient(var(--gold), var(--gold)) right 7px bottom 7px / 1px 20px no-repeat,
+    linear-gradient(180deg, rgb(20 16 14 / 96%), rgb(9 8 8 / 97%));
+  transition: border-color 400ms ease, box-shadow 400ms ease;
+}
+
+.vault-panel__grip {
+  display: none;
+}
+
+.vault-panel__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 4;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  color: var(--gold-hot);
+  background: rgb(7 6 5 / 80%);
+  cursor: pointer;
+}
+
+.vault-panel__close svg,
+.vault-gallery__arrow svg,
+.vault-panel__explore svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.vault-panel__close:focus-visible,
+.vault-gallery__arrow:focus-visible,
+.vault-gallery__thumb:focus-visible,
+.vault-panel__explore:focus-visible {
+  outline: 1px solid var(--gold-hot);
+  outline-offset: 3px;
+}
+
+.vault-panel__body {
+  min-height: 0;
+  flex: 1 1 auto;
+  padding: 22px 22px 8px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: var(--hairline) transparent;
+  scrollbar-width: thin;
+}
+
+.vault-panel:focus {
+  outline: none;
+}
+
+/* Gallery */
+.vault-gallery__stage {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--hairline);
+  background: #050404;
+  box-shadow: inset 0 0 0 3px rgb(7 6 5 / 80%), 0 0 22px rgb(var(--vault-torch) / 10%);
+}
+
+.vault-panel.is-mysterious .vault-gallery__stage {
+  box-shadow: inset 0 0 0 3px rgb(7 6 5 / 80%), 0 0 22px rgb(var(--vault-azure) / 26%);
+}
+
+.vault-gallery__backdrop {
+  position: absolute;
+  inset: -20px;
+  background-position: center;
+  background-size: cover;
+  filter: blur(18px) brightness(0.42) saturate(1.1);
+  transition: background-image 300ms ease;
+}
+
+.vault-gallery__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 1;
+  transition: opacity 280ms ease, transform 500ms var(--vault-ease);
+}
+
+.vault-gallery__image.is-swapping {
+  opacity: 0;
+  transform: scale(1.02);
+}
+
+.vault-gallery__image.is-missing {
+  visibility: hidden;
+}
+
+.vault-gallery__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  color: var(--gold-hot);
+  background: rgb(7 6 5 / 72%);
+  box-shadow: inset 0 0 0 3px rgb(7 6 5 / 80%), inset 0 0 0 4px var(--hairline-faint), 0 0 12px rgb(0 0 0 / 60%);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: box-shadow 200ms ease, background-color 200ms ease;
+}
+
+.vault-gallery__arrow:hover {
+  background: rgb(30 22 14 / 90%);
+  box-shadow: inset 0 0 0 3px rgb(7 6 5 / 80%), inset 0 0 0 4px var(--hairline-faint), var(--gold-glow);
+}
+
+.vault-gallery__arrow--prev {
+  left: 10px;
+}
+
+.vault-gallery__arrow--next {
+  right: 10px;
+}
+
+.vault-gallery__thumbs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.vault-gallery__thumb {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--hairline-faint);
+  background: #050404;
+  cursor: pointer;
+  opacity: 0.72;
+  transition: opacity 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.vault-gallery__thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vault-gallery__thumb:hover {
+  opacity: 1;
+}
+
+.vault-gallery__thumb[aria-current="true"] {
+  border-color: var(--gold-hot);
+  opacity: 1;
+  box-shadow: var(--gold-glow);
+}
+
+.vault-gallery__dots {
+  display: flex;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.vault-gallery__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgb(185 168 142 / 40%);
+}
+
+.vault-gallery__dot.is-active {
+  background: var(--gold-hot);
+  box-shadow: var(--gold-glow);
+}
+
+.vault-gallery.is-single :is(.vault-gallery__arrow, .vault-gallery__thumbs, .vault-gallery__dots) {
+  display: none;
+}
+
+.vault-gallery.is-single .vault-gallery__stage {
+  aspect-ratio: 4 / 3;
+}
+
+/* Text */
+.vault-panel__text {
+  padding-top: 18px;
+}
+
+.vault-panel__title {
+  margin: 0;
+  color: var(--gold-hot);
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 1.85vw, 2rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 14px rgb(var(--vault-torch) / 45%), 0 2px 2px #000;
+}
+
+.vault-panel.is-mysterious .vault-panel__title {
+  text-shadow: 0 0 16px rgb(var(--vault-azure) / 70%), 0 2px 2px #000;
+}
+
+.vault-panel__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.vault-panel__tag {
+  display: inline-flex;
+  min-height: 0;
+  align-items: center;
+  padding: 0.3rem 1.2rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+}
+
+.vault-panel__era {
+  display: grid;
+  gap: 3px;
+  margin: 16px 0 0;
+  font-family: var(--font-display);
+}
+
+.vault-panel__era-place {
+  color: var(--parchment);
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.vault-panel__era-dates {
+  color: var(--gold);
+  font-size: 1.05rem;
+  letter-spacing: 0.06em;
+}
+
+.vault-panel__era-dates:empty {
+  display: none;
+}
+
+.vault-panel__section {
+  margin-top: 16px;
+}
+
+.vault-panel__section h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 6px;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.vault-panel__section h3::after {
+  height: 1px;
+  flex: 1;
+  content: "";
+  background: linear-gradient(90deg, var(--hairline), transparent);
+}
+
+.vault-panel__section p {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--parchment);
+  font-size: 1.06rem;
+  line-height: 1.55;
+}
+
+.vault-panel__footer {
+  flex: 0 0 auto;
+  padding: 12px 22px 22px;
+  background: linear-gradient(180deg, transparent, rgb(9 8 8 / 90%) 30%);
+}
+
+.vault-panel__explore {
+  display: flex;
+  width: 100%;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  cursor: pointer;
+  font-size: 0.86rem;
+  letter-spacing: 0.2em;
+  box-shadow: inset 0 0 16px rgb(var(--vault-torch) / 14%), 0 0 16px rgb(var(--vault-torch) / 16%);
+  transition: box-shadow 200ms ease, background-color 200ms ease;
+}
+
+.vault-panel.is-mysterious .vault-panel__explore {
+  box-shadow: inset 0 0 16px rgb(var(--vault-azure) / 20%), 0 0 18px rgb(var(--vault-azure) / 30%);
+}
+
+.vault-panel__explore:hover {
+  background: rgb(26 20 14 / 90%);
+}
+
+.vault-panel.is-mysterious .vault-panel__explore:hover {
+  background: rgb(10 22 38 / 90%);
+}
+
+.vault-panel__explore svg {
+  transition: transform 250ms ease;
+}
+
+.vault-panel__explore:hover svg {
+  transform: translateX(3px);
+}
+
+.vault-stage.is-folio .vault-panel__explore svg {
+  transform: rotate(180deg);
+}
+
+/* Folio: the record opened wide over the vault */
+.vault-scrim {
+  position: fixed;
+  z-index: 4;
+  inset: 0;
+  background: rgb(5 4 3 / 70%);
+  backdrop-filter: blur(3px);
+}
+
+.vault-stage.is-folio .vault-panel {
+  position: absolute;
+  z-index: 6;
+  inset: 6px 24px 18px;
+  max-height: none;
+  margin: 0;
+}
+
+.vault-stage.is-folio .vault-panel__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 34px;
+  padding: 30px 34px 10px;
+}
+
+.vault-stage.is-folio .vault-gallery {
+  position: sticky;
+  top: 0;
+  align-self: start;
+}
+
+.vault-stage.is-folio .vault-panel__text {
+  padding-top: 0;
+}
+
+.vault-stage.is-folio .vault-panel__title {
+  font-size: clamp(1.9rem, 2.4vw, 2.6rem);
+}
+
+.vault-stage.is-folio .vault-panel__section p {
+  font-size: 1.14rem;
+}
+
+.vault-stage.is-folio .vault-panel__footer {
+  width: min(100%, 520px);
+  align-self: flex-end;
+}
+
+.vault-stage.is-panel-closed:not(.is-sheet) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.vault-stage.is-panel-closed:not(.is-sheet) .vault-panel {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Motion
+   -------------------------------------------------------------------------- */
+
+@keyframes vault-flicker {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  14% { opacity: 0.82; }
+  27% { opacity: 0.96; transform: translate(-50%, -50%) scale(1.03); }
+  41% { opacity: 0.78; }
+  56% { opacity: 1; transform: translate(-50%, -50%) scale(0.98); }
+  72% { opacity: 0.88; }
+  86% { opacity: 0.97; transform: translate(-50%, -50%) scale(1.02); }
+  100% { opacity: 0.9; transform: translate(-50%, -50%) scale(1); }
+}
+
+.niche__cone,
+.vault-scene__glow {
+  animation-name: vault-glow;
+}
+
+@keyframes vault-glow {
+  0% { opacity: 1; }
+  18% { opacity: 0.84; }
+  33% { opacity: 0.97; }
+  52% { opacity: 0.8; }
+  70% { opacity: 1; }
+  100% { opacity: 0.9; }
+}
+
+@keyframes vault-lick {
+  0% { transform: scale(1, 1) skewX(0deg); }
+  30% { transform: scale(0.94, 1.08) skewX(3deg); }
+  60% { transform: scale(1.04, 0.94) skewX(-2deg); }
+  100% { transform: scale(0.97, 1.05) skewX(1deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vault-flame::before,
+  .vault-flame i,
+  .niche__cone,
+  .vault-scene__glow {
+    animation: none !important;
+  }
+
+  .niche__lights,
+  .niche__display,
+  .vault-gallery__image,
+  .vault-panel,
+  .vault-scene__painted {
+    transition: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Tablet and phone: the panel becomes a bottom sheet
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 1050px) {
+  .page--artifacts .vault-stage {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+    min-height: calc(100svh - var(--header-height));
+  }
+
+  .page--artifacts .vault-stage__filters {
+    grid-column: 1;
+    margin-left: 0;
+  }
+
+  .page--artifacts .vault-stage__niches {
+    grid-column: 1;
+    min-height: 620px;
+  }
+
+  .vault-facade {
+    width: 100%;
+    translate: none;
+  }
+
+  .vault-wall--left {
+    width: 90px;
+  }
+
+  .vault-stairs,
+  .vault-brazier--right {
+    display: none;
+  }
+
+  .page--artifacts .vault-panel {
+    position: fixed;
+    z-index: 60;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    width: min(100%, 640px);
+    max-height: 86svh;
+    margin: 0 auto;
+    transform: translateY(104%);
+    visibility: hidden;
+    transition: transform 420ms var(--vault-ease), visibility 0s linear 420ms;
+  }
+
+  .page--artifacts .vault-stage.is-sheet-open .vault-panel {
+    transform: translateY(0);
+    visibility: visible;
+    transition: transform 420ms var(--vault-ease), visibility 0s;
+  }
+
+  .vault-panel__grip {
+    display: block;
+    width: 44px;
+    height: 4px;
+    flex: 0 0 auto;
+    margin: 10px auto 0;
+    border-radius: 2px;
+    background: var(--hairline);
+  }
+
+  .vault-scrim {
+    z-index: 55;
+  }
+
+  .vault-stage.is-folio .vault-panel {
+    position: fixed;
+    inset: auto 0 0;
+    max-height: 94svh;
+  }
+
+  .vault-stage.is-folio .vault-panel__body {
+    display: block;
+    padding: 18px 20px 8px;
+  }
+
+  .vault-stage.is-folio .vault-gallery {
+    position: static;
+  }
+
+  .vault-stage.is-folio .vault-panel__text {
+    padding-top: 18px;
+  }
+
+  .vault-stage.is-folio .vault-panel__footer {
+    width: auto;
+    align-self: stretch;
+  }
+}
+
+@media (max-width: 760px) {
+  .page--artifacts .vault-stage {
+    display: block;
+    padding: 14px 16px 40px;
+  }
+
+  .vault-filters {
+    display: grid;
+    width: 100%;
+    height: auto;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    margin-bottom: 18px;
+    padding: 6px;
+  }
+
+  .vault-filter {
+    min-height: 36px;
+    padding: 0 8px;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+  }
+
+  .vault-filter + .vault-filter::before {
+    display: none;
+  }
+
+  .vault-hall {
+    padding-bottom: 20px;
+  }
+
+  .page--artifacts .vault-stage__niches {
+    min-height: 0;
+  }
+
+  .vault-facade {
+    grid-template-rows: 26px auto 20px;
+  }
+
+  .vault-facade__rows {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding: 18px 14px 16px;
+  }
+
+  .vault-row {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .vault-pillar,
+  .vault-bay {
+    display: none;
+  }
+
+  .niche {
+    grid-template-rows: auto auto;
+    padding: 0;
+  }
+
+  .niche__arch {
+    height: 300px;
+  }
+
+  .niche.is-dimmed {
+    display: none;
+  }
+
+  .niche__title {
+    font-size: 0.8rem;
+  }
+
+  .vault-wall,
+  .vault-brazier {
+    display: none;
+  }
+
+  .vault-floor__disc {
+    left: 50%;
+    width: 150vw;
+  }
+}
