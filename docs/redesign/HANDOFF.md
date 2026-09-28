@@ -11,7 +11,7 @@ Spec = the four frames in `docs/redesign/mockups/full-res/`. Branch `redesign`; 
   work-in-progress checkpoint. See their NOTES.md entries for what works and what's left. Not yet reviewed
   side by side with the frames, so do that before anything else.
 - 🟡 Art: in `images/redesign/source/` (gitignored, raw PNGs) → WebP in `images/redesign/`.
-  - Done: event 1 (prehistoric/01), `dial/sky`, `vault/background`, possibly one or two vault niches.
+  - Done: event 1 (prehistoric/01), `vault/background`, possibly one or two vault niches.
   - Done: `dial/sky` (the painted sky/ruins background). The ring itself is still code-drawn.
   - Still to generate: `dial/ring` (1:1, transparent surround), remaining vault niches, events 2–63.
 - ⬜ 08 Search, 09 Mobile pass, 10 Polish + final review with Daryll.
