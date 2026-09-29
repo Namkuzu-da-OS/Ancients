@@ -11,9 +11,9 @@ Spec = the four frames in `docs/redesign/mockups/full-res/`. Branch `redesign`; 
 - 🟡 07 Vault: page built in code (niches, filters, gallery panel, bottom sheet) but 3 of 5 niches render dark in the screenshot (cartouche + swords black, hand axe + Venus dim), so the blank-cartouche bug is NOT fixed yet. Debug that first. Painted background is used but wasn't painted for code-drawn niches on top; may need a re-paint with a plain centre (see NOTES).
 - 🟡 03/04 Descent + event panel: fully coded (pinned strata, parallax, scroll-drawn gold thread + blue branch, gauge, markers, Did You Know, panel with focus trap, deep links `#era` / `#era-NN`), loads with 0 JS errors and all 63 events, but NEVER visually checked. The desktop screenshot is probably blank (6 KB). First job: screenshot it and compare with frame 2.
 - 🟡 Art: in `images/redesign/source/` (gitignored, raw PNGs) → WebP in `images/redesign/`.
-  - Done: event 1 (prehistoric/01), `vault/background`, possibly one or two vault niches.
+  - Done: event 1 (prehistoric/01), `vault/background`.
   - Done: `dial/sky` (the painted sky/ruins background). The ring itself is still code-drawn.
-  - Still to generate: `dial/ring` (1:1, transparent surround), remaining vault niches, events 2–63.
+  - Still to generate: `dial/ring` (1:1, transparent surround), all 5 vault niche renders, events 2–63.
 - ⬜ 08 Search, 09 Mobile pass, 10 Polish + final review with Daryll.
 
 ## How the art was made (keep doing it this way)
