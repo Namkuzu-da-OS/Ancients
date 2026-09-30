@@ -107,7 +107,8 @@ function probe(src) {
 function artFor(item, variant) {
   const art = el("span", `event-art event-art--${variant}`);
   const spread = (item.dataIndex * 37 + item.era.eraIndex * 11) % 100;
-  art.style.setProperty("--plate", `url("${item.era.plate}")`);
+  // Absolute URL: a relative url() in a custom property resolves against the stylesheet, not the page.
+  art.style.setProperty("--plate", `url("${new URL(item.era.plate, document.baseURI).href}")`);
   art.style.setProperty("--crop-x", `${spread}%`);
   const attach = () =>
     probe(item.image).then((ok) => {

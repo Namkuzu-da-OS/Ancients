@@ -742,7 +742,7 @@
   inset: 0;
   display: block;
   opacity: 1;
-  transition: opacity 1100ms var(--vault-ease), filter 600ms ease;
+  transition: opacity 650ms var(--vault-ease), filter 600ms ease;
 }
 
 .niche__lamp {
@@ -803,7 +803,25 @@
   object-fit: contain;
 }
 
-/* Photographed on black: the black drops away and the object floats in the light. */
+/* Photographed on black: the black drops away and the object floats in the light.
+   mix-blend-mode only reads correctly against an actual black backdrop, so the float
+   and painted variants isolate their own stacking context and paint a soft black pool
+   (via ::before) directly behind the image — otherwise "lighten" blends against the
+   torch-lit rock behind it and the object washes out into a pale, tinted ghost. */
+.niche__display--float,
+.niche__display--painted {
+  isolation: isolate;
+}
+
+.niche__display--float::before,
+.niche__display--painted::before {
+  position: absolute;
+  inset: 4% 6%;
+  content: "";
+  background: radial-gradient(ellipse 58% 60% at 50% 62%, #030202 60%, transparent 100%);
+  pointer-events: none;
+}
+
 .niche__display--float .niche__object {
   height: 100%;
   width: auto;
@@ -1108,21 +1126,23 @@
   opacity: 0.4;
 }
 
-/* The orchestrated entrance: torches catch one after another */
+/* The orchestrated entrance: torches catch one after another. Kept brief (well under a
+   second even for the last niche) and with a dim-not-black floor, so a real visitor reads
+   this as "the torches are still catching" rather than a broken/empty niche. */
 .vault-stage:not(.is-lit) .niche__lights {
   opacity: 0;
 }
 
 .vault-stage:not(.is-lit) .niche__display {
-  filter: brightness(0.2);
+  filter: brightness(0.4);
 }
 
 .vault-stage.is-lit .niche__lights {
-  transition-delay: calc(var(--i, 0) * 170ms + 150ms);
+  transition-delay: calc(var(--i, 0) * 90ms + 80ms);
 }
 
 .vault-stage.is-lit .niche__display {
-  transition: transform 500ms var(--vault-ease), filter 1100ms var(--vault-ease) calc(var(--i, 0) * 170ms + 250ms);
+  transition: transform 500ms var(--vault-ease), filter 650ms var(--vault-ease) calc(var(--i, 0) * 90ms + 140ms);
 }
 
 .niche__object.is-missing {

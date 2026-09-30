@@ -53,3 +53,79 @@
 - Event images: `images/redesign/events/<era>/<NN>-<slug>.webp` is probed lazily and used if it exists. Otherwise the fallback is a crop of that era's plate, so there is never a broken image. Missing files will show as 404s in the network log until all 63 exist.
 - Deep links: `#<eraId>` scrolls to the era; `#<eraId>-<NN>` (NN = 1-based data index) scrolls to that event and opens its panel.
 - UNVERIFIED / LEFT: no visual iteration against frame 2 was done. The desktop review screenshot (`review/descent-desktop.png`, taken with `#prehistoric-10`) came out ~6 KB and is likely blank or mid-intro, so it needs a retake. `review/descent-mobile.png` was captured but not reviewed. Still unchecked: the near-layer mask percentages (`PLATE_ROCK` in descent.js are eyeballed), label and panel collisions at 761–1100px, the Lenis/ScrollTrigger feel, and performance (Lighthouse). The View Transition from the Dial is not wired on this side. The data text "Placeholder: ..." in the theoretical event's details is shown as-is (content frozen).
+
+## Fix pass (Sonnet)
+
+**Bug 1, The Descent — "strata never show, near-black" — not a real CSS bug.** Extensively
+re-tested (all 8 eras, a full scroll survey, `#era` deep links, narrow viewport) by driving
+headless Chrome directly over CDP (`Page.captureScreenshot` after a real navigation + wait,
+not the one-shot CLI flag). Every era renders correctly: dark rock framing top/bottom, the
+era's painted world glowing through the gap, gold thread and medallions on top — closely
+matching frame 2, including the blue branch to the theoretical Younger Dryas impact event
+and medallions now showing plate crops (not black circles, confirming the already-present
+`artFor()` absolute-URL fix works). The "near-black" screenshot everyone kept re-taking
+(`review/descent-desktop.png` at ~6 KB, called out in the last handoff) is a genuine but
+separate Chromium bug: `chrome --headless=new --screenshot --virtual-time-budget=N` does not
+reliably capture the page after a JS-driven `window.scrollTo`/hash jump on a page using
+`position: sticky` — it silently returns a blank frame at the flat background colour,
+deterministically, regardless of budget size. Confirmed with a from-scratch, 20-line
+reproduction (plain HTML/CSS/JS, three `position: sticky` sections, one `window.scrollTo`
+on `DOMContentLoaded`, no GSAP/Lenis/app code at all) that hits the exact same failure. No
+changes were needed to `descent.css`/`descent.js` for this; `js/redesign/descent.js` keeps
+the one-line `artFor()` fix that was already staged. Final screenshots
+(`review/descent-desktop.png`, `review/descent-narrow.png`) were captured via CDP instead,
+at `#prehistoric` so the frame-2 comparison is apples-to-apples (same era, same events).
+Left open: this CDP-vs-CLI gap means any future screenshot-based review of a hash-scrolled
+page on this site needs the CDP route (or a real, non-headless browser) — the CLI flag alone
+will falsely read as broken.
+
+**Bug 2, The Vault — real bug found and fixed: `mix-blend-mode: lighten` blending against
+the wrong backdrop.** `.niche__display--float` (hand axe, Venus figurine) and
+`.niche__display--painted` (future painted niche renders) blend their photo with
+`mix-blend-mode: lighten`, which only reads correctly against a black backdrop — the
+comment above it even says "photographed on black, the black drops away." But neither rule
+gave the image its own backdrop, so it was blending against whatever happened to be painted
+behind it in the shared stacking context: the recess's warm torch-lit rock texture and glow
+gradients. Against that busy, non-black backdrop, "lighten" picks the brighter of source and
+backdrop per pixel, so the object's own shadows and midtones got overwritten by the ambient
+light, leaving a pale, desaturated, tinted ghost — exactly the "very dim" hand axe and Venus
+reported. Fixed by giving `.niche__display--float`/`--painted` `isolation: isolate` plus a
+soft radial near-black pool (`::before`) sized to the object, so the blend computes against
+near-black the way it was designed to, while the soft edge keeps the "floating in a light
+beam" look from frame 3 (no hard box edge). Both niches now render clean, correctly-toned
+photos matching their source images.
+
+Separately (not the wash-out bug, but the same screenshot mis-timing pattern as Bug 1): the
+niches' entrance ("torches catch one after another," `.vault-stage.is-lit`) staggers by
+`var(--i) * 170ms` with an 1100ms fade from a `brightness(0.2)` floor — worst case (the 5th
+niche) took ~2 seconds to fully settle, and a screenshot taken mid-transition genuinely shows
+later niches as black or dim, which is what "only the handbag niche lights properly" in the
+last handoff was looking at (confirmed by re-capturing at 900ms — swords black, axe/Venus
+dim or blurry, exactly as reported — then again with more wait — fully lit, matching frame
+3). It wasn't stuck; it just took too long and started too dark. Tightened so a real visitor
+doesn't get an almost-2-second window that reads as broken: stagger cut to 90ms, fade
+duration cut from 1100ms/1100ms to 650ms, and the pre-lit floor raised from
+`brightness(0.2)` to `brightness(0.4)` so an unlit niche mid-entrance reads as "dim candlelight,"
+not a black block. Worst case now settles in ~1.1s. `prefers-reduced-motion` already skips
+the transition entirely (instant final state), untouched.
+
+Also fixed per the task brief: `display()` in `vault.js` probed
+`images/redesign/vault/<artifactKey>.webp` for all 5 artifacts on every load, and since none
+of those renders exist yet (only `background.webp` does), that was 5 guaranteed 404s in the
+console on every visit. Added a `PAINTED_NICHES` manifest (currently empty) that gates the
+probe — a key only gets probed once its file actually exists and is listed there. Vault page
+now loads with zero console errors/warnings and zero failed network requests (checked via
+CDP `Network` domain, not just eyeballing devtools).
+
+**Files touched:** `css/redesign/vault.css`, `js/redesign/vault.js` (Bug 2 + kept the
+pre-staged one-line fix in `js/redesign/descent.js`). `docs/redesign/review/*.png` overwritten
+with CDP-captured screenshots (desktop 1672×941, narrow 868×1379) for both pages.
+
+**Still off vs. the frames:** the Descent's narrow/mobile layout has the "Did you know?"
+panel and gauge labels overlapping a bit untidily (pre-existing, out of this pass's two named
+bugs). The Vault's bronze-age-swords and hand-axe/Venus niches are correct now but still read
+slightly less punchy than frame 3's saturated gold-lit version — a genuine art/grade pass
+(not a bug) once `images/redesign/vault/*.webp` painted niche renders exist would close that
+gap further. Event art for events 2–63 and most of `earlyNeolithic`/`earlyUrban` still 404s
+to its plate-crop fallback on the Descent (expected, tracked in the handoff, not touched here
+— out of scope for Bug 1).
