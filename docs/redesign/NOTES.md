@@ -129,3 +129,76 @@ slightly less punchy than frame 3's saturated gold-lit version — a genuine art
 gap further. Event art for events 2–63 and most of `earlyNeolithic`/`earlyUrban` still 404s
 to its plate-crop fallback on the Descent (expected, tracked in the handoff, not touched here
 — out of scope for Bug 1).
+
+## 06 The Dial (Sonnet build)
+
+Built for real this time: `index.html` main rebuilt on the Codex head/header skeleton, `css/redesign/dial.css`,
+`js/redesign/dial.js`. GSAP 3.13.0 added from jsDelivr for the ring tween only (no ScrollTrigger/Lenis needed —
+this is a single-viewport page, not a scroller). All words come from `data/timeline.json`, `data/did-you-know.json`,
+`data/artifacts.json` via `loadAncientsData()`; `node tools/verify-content.mjs` passes.
+
+**What works, verified by driving headless Chrome over CDP (own temp profile, port 9333, `Page.captureScreenshot`
+after a real navigate + wait — the one-shot CLI flag was not used, per the known blank-frame issue logged in the
+Descent fix pass):**
+- Real painted art: `images/redesign/dial/sky.webp` full-bleed behind a transparent header (page-scoped override,
+  shared header markup untouched), `images/redesign/dial/ring.webp` as the rotating zodiac ring (`scaleY(0.8)`
+  tilt), a circular window cross-fading each era's `images/redesign/strata/<id>.webp` plate (eyeballed per-era
+  `background-position-x` so the window shows real subject matter, not empty rock — numbers reused from the prior
+  agent's research in the last handoff).
+- Ring really rotates: 45°/era via GSAP (`elastic.out`) on wheel, drag-on-ring, arrow keys, era-rail clicks and
+  scrubber arrows, all funnelled through one `goToEra()`. `prefers-reduced-motion` short-circuits every tween to an
+  instant `style.transform`/`style.opacity` set (checked: identical final frame, no motion).
+- Orbit: up to 6 medallions picked evenly across the era's real event order (`Math.round((n-1)*i/(k-1))`), always
+  keeping the one theoretical event (only `prehistoric` has one — index 9, confirmed it lands in the picked set
+  from the formula alone, no special-casing needed). A gold SVG polyline threads every picked point; the segments
+  either side of the theoretical point are duplicated in blue on top, matching "gold everywhere, blue only at the
+  theoretical join." Medallion art probes `images/redesign/events/<periodId>/<NN>-<slug>.webp` (same slug/NN rule
+  as `descent.js`) and falls back to a cropped, per-item-offset plate crop — never a broken image. Clicking a
+  medallion (or the default, the last/rightmost orbit item) focuses the right-hand event panel.
+- Event panel: image, date, title, Mainstream/Theoretical tag, description, `details.details` when present,
+  "Enter this era" → `timeline.html#<periodId>`, using `document.startViewTransition` when available (confirmed:
+  navigating from the Dial lands cleanly on the Descent at that era, console clean) and a plain navigation
+  fallback otherwise. The panel is a flex column with its own scrolling region so the CTA button never gets
+  pushed off the bottom on short/cramped viewports — it stays pinned, description scrolls above it.
+- Did You Know (bottom-left): hidden via `[hidden]` when the era's `didYouKnow` key is null (verified for
+  `earlyNeolithic`/`earlyUrban`, the two with none), otherwise a random fact with a refresh control (same
+  interaction as the Descent's, not a dead "Learn More" link — the frame's wording is filler per the bible).
+  Artifacts teaser (bottom-right): three real artifact photos from `data/artifacts.json` (data order, not
+  cherry-picked) over "ARTIFACTS — EXPLORE REMARKABLE OBJECTS FROM OUR PAST →", linking to `artifacts.html`.
+- Scrubber: era name + date range, prev/next arrows, "TURN THE DIAL TO CHOOSE AN ERA" — all wired to the same
+  `goToEra()` as every other control, so they can never go out of sync with the ring or rail.
+- Mobile (≤760px, checked at 390×844 against frame 4's left phone): the stage becomes a normal scrolling column —
+  ring fills the width, left rail and the bottom-left/right panels hide, a horizontal swipe strip of era cards
+  (plate-crop thumbnails + name/range, with its own prev/next arrows) replaces the rail, and the event panel sits
+  below the ring. No horizontal scroll (`document.documentElement.scrollWidth === clientWidth`, checked via CDP).
+- No console errors or exceptions at any tested size (1672×941, 1440×900, 1200×800, 1070×1741 — the owner's real
+  window — and 390×844). The only network 404s are the deliberate `Image()` probes for event art that hasn't been
+  painted yet (e.g. `prehistoric/08-global-climate.webp`), same accepted pattern as `descent.js`/`vault.js`.
+
+**Fixed during the build, not just left as "unverified":** the event/rail/fact panels first used independent
+`top`/`bottom`/`max-height` guesses and visibly overlapped at 1200×800 (confirmed via `getBoundingClientRect`, not
+just eyeballing). Replaced with two shared bands on `.dial-stage` (`--top-band`, `--bottom-band`, both
+`clamp()`s off viewport height) that every floating panel reads from, so the rail/event panel can never collide
+with the fact/teaser panels regardless of viewport height. Separately, giving the event panel a `bottom` anchor
+to stop that overlap first caused the opposite bug on the very tall 1070×1741 window — the panel stretched to
+fill the whole band, leaving a huge empty gold-framed box with the button stranded at the bottom. Fixed by
+capping with `max-height` instead of stretching with `bottom`, so the panel is always sized to its own content
+and only ever capped, never force-stretched.
+
+**Honest gaps vs. frame 1:**
+- The frame's event medallions are plain painted illustrations; ours are real event photography (packet 05 art)
+  or a plate-crop fallback where that art doesn't exist yet (`prehistoric` events 8 and 10, `earlyNeolithic` event
+  6, and most of the other eras — expected per AGENTS.md rule 7, coding agents don't generate images).
+- The frame's six-event example ("Out of Africa," "Göbekli Tepe," etc.) is mockup filler; the real
+  `prehistoric` data's evenly-spaced picks land on "Cultural Revolution" and "Global Climate" (which appears
+  three times at different years in the real data — content frozen, not a bug) instead. This is correct per the
+  bible ("layout from the frame, words from the data"), but it does mean the composition doesn't literally
+  reproduce the frame's six captions.
+- The orbit's ellipse radius/tilt (`R=460`, `TILT=0.64` in `dial.js`) and the per-era plate `background-position-x`
+  table in `PLATE_FOCUS` were tuned by eye against screenshots, not measured pixel-for-pixel against the frame —
+  close, not exact.
+- Not done: packet 08 (search) — the header search field is still inert on every page, out of this packet's scope.
+  Dial → Descent View Transition visuals (the window "expanding to fill the screen") were not inspected frame-by-
+  frame; only the end state (landing on the right stratum, console clean) was confirmed.
+- `vault.css` showed as modified in `git status` from a concurrent agent's session while this packet ran; left
+  untouched and unstaged, per the brief.
