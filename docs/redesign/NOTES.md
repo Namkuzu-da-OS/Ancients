@@ -202,3 +202,103 @@ and only ever capped, never force-stretched.
   frame; only the end state (landing on the right stratum, console clean) was confirmed.
 - `vault.css` showed as modified in `git status` from a concurrent agent's session while this packet ran; left
   untouched and unstaged, per the brief.
+
+## Fix pass 2 (Sonnet)
+
+Second fix pass, two named bugs (`artifacts.html`/`vault.css` and `timeline.html`/`descent.css`/`descent.js`).
+Verified throughout by driving headless Chrome directly over CDP (own temp profile, `Page.captureScreenshot`
+after a real navigate + explicit wait, never the one-shot `--screenshot` CLI flag) at all five required widths:
+1070×1741 (the owner's real window), 1280×800, 1440×900, 1672×941 (the frame's own resolution) and 390×844.
+
+**Bug A, the Vault — real bug found and fixed: the side panel is open by default (the first artifact
+auto-selects on load, `select(entries[0][0], false)` in `vault.js`), which above the 1050px bottom-sheet
+breakpoint always reserves its grid column (`grid-template-columns: minmax(0, 1fr) clamp(330px, 25.6vw,
+430px)`). `.vault-hall` then stretched the facade (`.vault-facade`) to fill 100% of that row's height via the
+default flex `align-items: stretch`, with no cap tying that height back to the facade's own (panel-narrowed)
+width. On a normal-ish window this coincidentally looks fine, because the available height happens to be in
+the same ballpark as what the width-capped facade "wants" — but on the owner's actual 1070×1741 window the
+facade stretched to 671px tall at only 121px wide per niche column, and `getBoundingClientRect()` on the niche
+photos measured exactly the slivers from the bug report (16×196, 94×377, down to a 5×12 vitrine crop once the
+object-fit math compounded). Confirmed the same root cause at 1070×800 too (narrower alone is enough; a tall
+window just makes it worse) and that 1280×800/1440×900/1672×941 "accidentally" avoided it only because their
+height happens to roughly match what the capped width implies.
+
+Fixed by deriving the facade's height from its own width instead of the row's full height: added
+`align-items: center` to `.vault-hall` and `height: auto; max-height: 100%; aspect-ratio: 1020 / 653` to
+`.vault-facade` (that ratio is exactly the facade's own measured box at the frame's native 1672×941 — so the
+facade now always renders at the same proportions it already looked right at, regardless of window height),
+scoped to `@media (min-width: 1051px)` only — the ≤1050px bottom-sheet layout and the ≤760px stacked-mobile
+layout were never part of this bug and are untouched, confirmed unaffected by direct screenshot. Re-measured
+after the fix: 1070×1741 niches are now 121×132 (was 121×671); 1280×800 184×194; 1440×900 220×228; 1672×941
+unchanged at 271×276 (same numbers before and after, as expected — the fix is a no-op at the width/height ratio
+it was tuned from). Every niche now reads as a sensible arch at every tested width, every artifact photo is
+clearly visible (axe, Venus figurine, cartouche, handbag triptych, swords vitrine all legible), and the extra
+vertical room on the 1070×1741 window is simply more cave wall/floor above and below the facade — in keeping
+with the scene, not a stretch artifact.
+
+Also re-confirmed the niche "torches catch one after another" entrance (tuned in the last pass to ~1.1s worst
+case) completes cleanly within a normal wait at every width, and ran the gallery for all 5 artifacts through
+every image (via `naturalWidth`/`complete` checks, not just eyeballing) — no missing or black thumbnails at any
+width; the "flat black/brown" read on the bronze-age-swords niche in the original report was the same squeeze
+(a 5×12px crop of a close-up photo reads as a blob at that size) and is fixed by the above, not a separate
+image bug — the source photo (`Latenium-epees-bronze.webp`) is itself a macro shot of two sword hilts, not the
+frame's illustrated three-swords-in-a-row; that's a content/art-direction gap, not a layout bug, and content is
+frozen.
+
+**Bug B, the Descent — two issues, one real and fixed, one investigated and not reproduced.**
+
+*Dark opening on tall windows — real cause found, fixed.* `.stratum__far img`/`.stratum__near img` use
+`object-fit: cover` with a fixed `object-position: 50% 42%`. On a box far taller (relative to its width) than
+the 1672×941 plates, `cover` always picks the height-driven scale (the larger of the two), which lands exactly
+on the box height with **zero vertical crop** — so plain CSS alone already shows the plate's full vertical
+range (sky to lit world) with only heavy, centred horizontal cropping, and `object-position`'s vertical value
+has no slack left to act on. The actual culprit is `buildParallax()` in `descent.js`: it tweens each stratum's
+far/near layers by a fixed `yPercent`/`scale` (±3.5% / 1.06–1.13) as you scroll through that era. That
+percentage is of the layer's own (already very tall, cover-stretched) box, so on a normal-ish window it's a
+small, subtle pan — but on the owner's 1070×1741 window the same percentage is a much larger pixel swing,
+easily carrying the lit lower band mostly out of frame at the start of a long stratum before any scrolling
+"catches up." Confirmed via CDP screenshot at scroll 0: the Modern-era opening did show mostly dark sky with
+the city only becoming prominent part-way down, consistent with the report, though less total blackout than
+described — likely the pipeline since added more finished plates/events than existed when the bug was filed.
+
+Fixed by adding real vertical crop on tall/narrow desktop windows before any scroll-driven parallax runs:
+`@media (min-width: 761px) and (max-aspect-ratio: 3/4)` applies `transform: scale(1.32); transform-origin: 50%
+64%;` directly to `.stratum__far img`/`.stratum__near img` (the images, not the GSAP-tweened wrapper divs, so
+there's no fight with the scroll animation). This zooms in just enough to create real vertical slack, biased
+low via `transform-origin`, so the lit band is already on screen at rest. Scoped narrowly: `min-width: 761px`
+keeps mobile (which has its own tuned `object-position: 46% 44%` at ≤760px) untouched, and `max-aspect-ratio:
+3/4` means normal/wide windows (1280×800, 1440×900, 1672×941 — none of which are anywhere near that ratio) are
+completely unaffected, confirmed by screenshot (1672×941 is pixel-for-pixel the same composition before and
+after). Verified the fix at 1070×1741 across several eras (Modern at scroll 0, Prehistoric via `#prehistoric`,
+Classical via `#classical`) — every opening view now shows its lit world clearly, and the Prehistoric view is
+a close match to frame 2 (mammoths, the walking band, the blue theoretical branch, the snow peak).
+
+*Label/gauge collisions and dark medallions — investigated, not reproduced in this build; one defensive fix
+added anyway.* Swept both 1070×1741 and 390×844 with a scripted full-page scroll (24 steps bottom to top) doing
+real `getBoundingClientRect()` overlap checks between every visible marker label, the gauge window, the Did You
+Know panel and the era plaque at each step: zero overlaps found at either width. The depth-gauge numbers do sit
+low-contrast against some bright plate passages (e.g. the icy Prehistoric sky), which could read as "garbled"
+at a glance without being an actual DOM overlap — flagging as a legibility note, not fixing blind. Separately,
+scrolled the whole page slowly (40 steps, matching how a real visitor scrolls, not a jump) and confirmed every
+one of the 33 event images that currently exist on disk (prehistoric, earlyNeolithic, earlyUrban — the
+pipeline has added many since the last pass) successfully attaches via the lazy `IntersectionObserver` probe,
+with no dark/stuck medallions; same result jumping straight to an era via `#hash` with no manual scroll at all.
+Could not force a repro of "existing images rendering dark." Still hardened the one plausible real-browser gap
+the report's own wording pointed at — "the lazy probe never firing for markers already in view" — by also
+calling `item.medalArt?._attach?.()` the moment a marker's `is-lit` state flips on in the main scroll-driven
+`frame()` loop in `descent.js` (previously only the `IntersectionObserver` callback and the `#event-key` deep-
+link handler called `_attach()`). `_attach()` is idempotent (it no-ops once an `<img>` is already present), so
+this costs nothing once an image has loaded and guarantees every lit marker's real art gets requested
+independent of whether IO caught its transition into the 1200px root margin. The `.marker:not(.is-lit)
+.marker__medal { filter: saturate(0.35) brightness(0.5) }` dimming of not-yet-reached markers is deliberate,
+pre-existing design (frame 2's "thread hasn't reached it yet" read) and was not touched.
+
+**Files touched:** `css/redesign/vault.css` (Bug A), `css/redesign/descent.css` + `js/redesign/descent.js`
+(Bug B). `docs/redesign/review/vault-1070.png`, `vault-1440.png`, `descent-1070-top.png`,
+`descent-1070-prehistoric.png`, `descent-390.png` added. `node tools/verify-content.mjs` passes.
+
+**Still open:** the Descent's "dark opening" fix reduces the pixel-level parallax swing but was tuned by eye
+(`scale(1.32)`/`transform-origin: 50% 64%`) against a handful of eras, not measured per-plate — a few eras may
+want slightly different numbers once more plates/events exist. The gauge-text-vs-bright-plate legibility note
+above is unaddressed. The bronze-age-swords vitrine crop reading as an abstract close-up rather than "three
+swords" is a content/art gap (the real photo vs. the frame's illustration), not something this pass touched.

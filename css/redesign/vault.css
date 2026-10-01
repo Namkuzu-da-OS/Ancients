@@ -520,6 +520,30 @@
     30px 0 50px rgb(0 0 0 / 50%);
 }
 
+/* Bug fix (Sonnet, fix pass 2): above the bottom-sheet breakpoint the side panel always
+   reserves its grid column (an artifact is auto-selected on load), which can leave the
+   facade much narrower than tall on a narrow-but-tall desktop window (e.g. 1070x1741).
+   .vault-hall previously stretched the facade to fill 100% of the row's height regardless
+   of width, so the niche grid rows kept the full viewport height while their width shrank
+   with it, squeezing each niche into a tall thin sliver (measured as low as 16x196px) and
+   the vitrine/slab photos inside into unrecognizable strips. Deriving the facade's height
+   from its own width (matching the proportions it renders at cleanly, ~1020x653 at the
+   frame's own 1672px reference width) keeps every niche arch a sensible, frame-like shape
+   at any window height, with the extra cave scrolling into view above/below on tall windows
+   instead of stretching the facade. Scoped to >1050px only: the bottom-sheet and stacked
+   mobile layouts below that were never part of this bug and are untouched. */
+@media (min-width: 1051px) {
+  .vault-hall {
+    align-items: center;
+  }
+
+  .vault-facade {
+    height: auto;
+    max-height: 100%;
+    aspect-ratio: 1020 / 653;
+  }
+}
+
 .vault-facade__lintel {
   position: relative;
   border-bottom: 2px solid rgb(0 0 0 / 70%);

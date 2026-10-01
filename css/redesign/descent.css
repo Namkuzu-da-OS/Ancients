@@ -99,6 +99,31 @@ html.lenis body {
   object-position: 50% 42%;
 }
 
+/* Bug fix (Sonnet, fix pass 2): on a tall, narrow desktop window (e.g. 1070x1741) the
+   stage box is far taller, relative to its width, than the 1672x941 plates themselves.
+   object-fit: cover always picks the LARGER of the two fit scales so nothing gaps; for a
+   box this much taller than it is wide, that is always the height-driven scale, which
+   lands exactly on the box height with zero vertical crop (just heavy, centred horizontal
+   cropping) — so, by itself, cover already shows the plate's full vertical range (sky down
+   to the lit world) end to end, and object-position's vertical component has no slack left
+   to act on. The opening screen only shows the sky in practice because GSAP's scroll
+   parallax (see buildParallax in descent.js) then zooms and pans that already-tall render
+   by a few percent, and a few percent of an unusually tall box is a much bigger pixel swing
+   than the same percentage on a normal 16:9-ish window — easily enough, on a window this
+   shape, to carry the lit lower band most of the way out of frame before the user has
+   scrolled. Forcing a bit of real vertical crop ourselves first (scale the image up beyond
+   cover's minimum, then re-centre the crop low with transform-origin) guarantees the lit
+   band is already on screen at rest, before any scroll-driven parallax runs, on exactly the
+   narrow-but-tall shapes where cover alone cannot do that. Scoped to desktop widths only;
+   mobile keeps its own tuned object-position above. */
+@media (min-width: 761px) and (max-aspect-ratio: 3/4) {
+  .stratum__far img,
+  .stratum__near img {
+    transform: scale(1.32);
+    transform-origin: 50% 64%;
+  }
+}
+
 .stratum__far img {
   filter: saturate(1.06) contrast(1.04);
 }

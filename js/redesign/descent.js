@@ -802,6 +802,16 @@ async function main() {
       if (lit !== item.lit) {
         item.lit = lit;
         item.button.classList.toggle("is-lit", lit);
+        // Bug fix (Sonnet, fix pass 2): a lit marker is, by definition, one the thread has
+        // already reached, which in practice means it is on screen or just behind it. The
+        // IntersectionObserver in init() (rootMargin 1200px) is the normal trigger for its
+        // art probe, but a reported case had existing event images rendering dark/unloaded
+        // even once clearly in view — most likely an IO miss on a fast programmatic jump
+        // (a hash deep link or a quick scroll past the 1200px margin before the observer's
+        // first callback lands). Re-asserting the attach here, gated by the already-lit
+        // state so it costs nothing once an image has loaded, guarantees every lit marker's
+        // real art (if it exists) gets requested, independent of whether IO caught it.
+        if (lit) item.medalArt?._attach?.();
       }
     });
 
