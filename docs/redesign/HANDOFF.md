@@ -27,3 +27,10 @@ The no-click save pipeline (local receiver + postMessage) is described in Claude
 - Content is frozen. Any event that exists must still exist, word for word (Daryll, 2026-09-27).
 - 14 popups literally say "Placeholder"; they stay unless Daryll says otherwise.
 - Nothing gets pushed or published without Daryll's yes.
+
+## Update 2026-09-30 (paused by Daryll)
+- Dial: built (d0afde5), checked in his browser: ring rotates, eras switch. Polish: ring sits low/small on tall windows; arrow keys need page focus.
+- Descent: fixed (7e24ad0), checked in his browser: opens on the painted city; Prehistoric matches frame 2.
+- Vault: STILL WRONG at his 1070x1741 window: after fix pass 2 the niche wall shrank to a small strip, and the painted background's own niches compete. Fix pass 3 was stopped mid-edit; its partial vault.css is in `git stash` ("vault-pass3-partial"). Brief for the next pass: artifacts big at every size; portrait/<=1300px -> full-width niche wall + panel as bottom sheet/slide-over; background must read as one vault.
+- Art: 32 of 63 event images in. ChatGPT stopped accepting messages after event 42 (likely rate limit). Missing: prehistoric 08-11 (incl. theoretical), earlyNeolithic 06,10, earlyUrban 05,07, bronzeAge 04,05, classical 01 onward, then the 5 vault objects. Queue + prompts: session scratchpad `queue2.js` / `event-briefs.json` (rebuild from data/timeline.json if gone).
+- Builder rules: test at 1070x1741 (his window), CDP screenshots, never kill Chrome by name.
