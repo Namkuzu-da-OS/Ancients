@@ -302,3 +302,52 @@ pre-existing design (frame 2's "thread hasn't reached it yet" read) and was not 
 want slightly different numbers once more plates/events exist. The gauge-text-vs-bright-plate legibility note
 above is unaddressed. The bronze-age-swords vitrine crop reading as an abstract close-up rather than "three
 swords" is a content/art gap (the real photo vs. the frame's illustration), not something this pass touched.
+
+## Vault fix pass 3 (Sonnet)
+
+**What was wrong:** at 1070x1741 the side panel reserved a column and the facade's height followed the row, so the 3+2 wall
+shrank to a ~570x365 strip with 16-33px objects; the painted background's own arches sat right behind it as a second set.
+
+**What changed** (`css/redesign/vault.css`, `js/redesign/vault.js`, `artifacts.html` untouched):
+- The five new renders (`images/redesign/vault/<artifact-id>.webp`) are the niche objects. `NICHE_RENDERS` in vault.js maps
+  artifact id to file (ids equal file names); a render that fails to load falls back to the old photo presentation. The black
+  ground is removed with `mix-blend-mode: screen` on the `<img>`. Nothing between the recess and the img may create a
+  stacking context (that is why entrance dimming, hover lift and filtered-out dimming are applied to the img, not to
+  `.niche__display`). The recess backdrop was darkened and the halo/cone lights softened so the object keeps its contrast.
+  The real photos are untouched in the detail gallery.
+- Three layouts. (1) Landscape wider than 1300px: wall left, panel right, as in frame 3. (2) At or below 1300px wide, or
+  portrait: no panel column; the panel is a bottom sheet (opens on click, never auto-opens, close button / scrim / Esc close;
+  `sheetQuery` in vault.js matches the CSS breakpoint). (3) "Tall" layout (portrait, or window shorter than 600px, above
+  760px wide): full-width wall, niche arches are aspect 0.78 so the wall uses the height. Phones (<=760px) keep the stacked
+  layout. In the fit layouts the facade width comes from the window height (`clamp(880px, (100svh - 262px) * 1.56, 1060px)`).
+- One vault, not two: the painted background is dimmed above the floor line (`.vault-scene__painted::after`, much darker in the
+  tall layout where the wall fills the width) and the facade carries a feathered backdrop-blur halo (`.vault-facade::before`),
+  so the painted niches are never legible behind the coded wall. Floor, braziers and cave edges stay clear.
+- Frame-3 touches: plaque overlaps the arch foot, arches are true arches (percentage radii), darker carved stone, reliefs in the
+  lower row's end bays (`bay()` in vault.js), thinner pillars in the tall layout.
+- Stage `overflow: clip` (the halo was stretching the page 32px past the viewport at 1280x800).
+- Phone sheet capped to sit under the tall phone header (the search field was poking through it).
+- Stash `vault-pass3-partial` was read, not used, not dropped (its aspect-ratio idea is superseded by the layout split above).
+
+**Measured** (getBoundingClientRect of the niche `<img>`, a square; the object itself is 0.92-0.95 of that height, 0.40-0.65 of
+its width; screenshots taken after the 4.5s entrance):
+
+| window | img box | object height | facade |
+|---|---|---|---|
+| 1070x1741 | 282-313 | ~259-291 | 1036x931, x 17-1053 (97% of width) |
+| 1280x800 | 164-167 | ~151-159 | 880x563 |
+| 1440x900 | 195-198 | ~180-188 | 995x637 |
+| 1672x941 | 208-215 | ~191-204 | 1059x678 |
+| 390x844 | 234 | ~215-222 | 358x1775 stacked |
+
+Tested at 1070x1741: click opens the sheet with the right artifact (Bronze Age Swords / Paleolithic Hand Axe), close button and Esc
+close it, ArrowRight moves the gallery, "Mysterious" leaves only the handbags lit. Same checks pass at 1672x941 (panel column).
+Console: zero errors at every size. `node tools/verify-content.mjs` passes. Screenshots: `docs/redesign/review/vault-pass3-<w>.png`.
+
+**Honest gap against frame 3:** the objects now match the frame, but the surround is plainer. The frame's wall is carved
+megalithic stone with statues, hieroglyph pillars and a lit staircase; ours is code-drawn brown stone with glyph pillars, and the
+painted stairs/braziers are mostly dimmed away behind the wall. At 1280x800 the height budget (header 126px) limits objects to
+~155px. On the tall layout there is an empty dark band above the wall.
+
+**Unverified:** Safari/Firefox (`backdrop-filter` with a composite mask, `overflow: clip`, `mix-blend-mode` on the img);
+real touch on the sheet; `prefers-reduced-motion` run; widths between 761 and 1000px were not screenshotted.

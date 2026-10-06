@@ -54,7 +54,7 @@
   height: calc(100svh - var(--header-height));
   min-height: 640px;
   padding: 14px 24px 18px;
-  overflow: visible;
+  overflow: clip; /* the wall's soft halo must not stretch the page */
   background: none;
 }
 
@@ -112,13 +112,27 @@
   position: absolute;
   inset: 0;
   opacity: 0;
-  background-position: center;
+  background-position: 55% 100%;
   background-size: cover;
   transition: opacity 900ms ease;
 }
 
 .vault-stage.has-painted-bg .vault-scene__painted {
   opacity: 1;
+}
+
+/* The painted wall zone (its niches, plinths, arches) sits at ~10-79% of the picture height;
+   dim and soften it everywhere so only the coded wall reads as the niche wall. The floor
+   (bottom ~21%), braziers, stairs and cave mouth stay clear. */
+.vault-scene__painted::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(180deg, rgb(5 4 3 / 50%) 0, rgb(5 4 3 / 58%) 60%, rgb(5 4 3 / 66%) 77%, transparent 87%);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  -webkit-mask-image: linear-gradient(180deg, #000 0, #000 78%, transparent 87%);
+  mask-image: linear-gradient(180deg, #000 0, #000 78%, transparent 87%);
 }
 
 .vault-stage.has-painted-bg :is(.vault-scene__rock, .vault-wall, .vault-stairs, .vault-floor, .vault-brazier) {
@@ -385,7 +399,6 @@
   justify-self: center;
   gap: 0;
   padding: 5px;
-  margin-left: clamp(0px, 8vw, 150px);
   border: 1px solid var(--hairline);
   border-radius: 3px;
   background:
@@ -493,26 +506,34 @@
   z-index: 2;
   display: flex;
   min-height: 0;
-  justify-content: flex-end;
-  padding-bottom: clamp(40px, 7vh, 78px);
+  align-items: center;
+  justify-content: center;
+  padding-bottom: clamp(6px, 1.2vh, 14px);
 }
 
+/* The wall. Landscape ("fit" layout): a fixed-proportion facade sized from the window height so
+   the whole 3 + 2 wall is on screen at once, never narrower than 880px and never wider than the
+   frame's ~1060px. Portrait or short windows switch to the "tall" layout below, where the wall
+   takes the full width and its height follows the (large) niches. */
 .vault-facade {
+  --pw: 52px; /* pillar width */
+  --pt: 14px; /* rows padding top / bottom (pillars bleed into it) */
+  --pb: 8px;
   position: relative;
   display: grid;
-  width: min(100% - clamp(0px, 9vw, 150px), 1060px);
-  min-height: 0;
-  grid-template-rows: 34px minmax(0, 1fr) 26px;
-  margin-right: auto;
-  margin-left: auto;
-  translate: clamp(0px, 4.5vw, 75px) 0;
+  width: clamp(min(100%, 880px), (100svh - 262px) * 1.56, min(100%, 1060px));
+  height: auto;
+  max-height: 100%;
+  aspect-ratio: 1020 / 653;
+  grid-template-rows: 28px minmax(0, 1fr) 20px;
   background:
     radial-gradient(ellipse 70% 50% at 50% 100%, rgb(var(--vault-torch) / 18%), transparent 70%),
     linear-gradient(90deg, rgb(0 0 0 / 55%), transparent 8%, transparent 92%, rgb(0 0 0 / 55%)),
     var(--vault-grain) 0 0 / 300px 300px,
+    linear-gradient(rgb(7 5 3 / 52%), rgb(7 5 3 / 52%)),
     var(--vault-rock) 40px 0 / 560px 560px,
-    #3b2413;
-  background-blend-mode: screen, normal, soft-light, normal, normal;
+    #2a1a0e;
+  background-blend-mode: screen, normal, soft-light, normal, normal, normal;
   box-shadow:
     0 0 0 1px rgb(0 0 0 / 80%),
     0 30px 60px rgb(0 0 0 / 70%),
@@ -520,28 +541,22 @@
     30px 0 50px rgb(0 0 0 / 50%);
 }
 
-/* Bug fix (Sonnet, fix pass 2): above the bottom-sheet breakpoint the side panel always
-   reserves its grid column (an artifact is auto-selected on load), which can leave the
-   facade much narrower than tall on a narrow-but-tall desktop window (e.g. 1070x1741).
-   .vault-hall previously stretched the facade to fill 100% of the row's height regardless
-   of width, so the niche grid rows kept the full viewport height while their width shrank
-   with it, squeezing each niche into a tall thin sliver (measured as low as 16x196px) and
-   the vitrine/slab photos inside into unrecognizable strips. Deriving the facade's height
-   from its own width (matching the proportions it renders at cleanly, ~1020x653 at the
-   frame's own 1672px reference width) keeps every niche arch a sensible, frame-like shape
-   at any window height, with the extra cave scrolling into view above/below on tall windows
-   instead of stretching the facade. Scoped to >1050px only: the bottom-sheet and stacked
-   mobile layouts below that were never part of this bug and are untouched. */
-@media (min-width: 1051px) {
-  .vault-hall {
-    align-items: center;
-  }
-
-  .vault-facade {
-    height: auto;
-    max-height: 100%;
-    aspect-ratio: 1020 / 653;
-  }
+/* One vault, not two: the painted background carries its own niches and arches. Behind and
+   around the coded wall they are blurred out and dimmed (feathered at the edges), so what you
+   see is the carved wall in front, the cave's depth behind it, and only the painted floor,
+   braziers and stairs beyond. */
+.vault-stage.has-painted-bg .vault-facade::before {
+  position: absolute;
+  z-index: -1;
+  inset: -11% -9%;
+  content: "";
+  pointer-events: none;
+  backdrop-filter: blur(12px) brightness(0.32) saturate(0.7);
+  -webkit-backdrop-filter: blur(12px) brightness(0.32) saturate(0.7);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent), linear-gradient(180deg, transparent, #000 16%, #000 84%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent), linear-gradient(180deg, transparent, #000 16%, #000 84%, transparent);
+  mask-composite: intersect;
 }
 
 .vault-facade__lintel {
@@ -550,7 +565,7 @@
   background:
     linear-gradient(180deg, rgb(255 196 128 / 18%), transparent 30%, rgb(0 0 0 / 40%)),
     var(--vault-grain) 60px 0 / 300px 300px,
-    #4a2e18;
+    #36210f;
   background-blend-mode: normal, soft-light, normal;
   box-shadow: 0 1px 0 rgb(255 196 128 / 18%);
 }
@@ -566,8 +581,8 @@
   display: grid;
   min-height: 0;
   grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 14px;
-  padding: 16px 0 10px;
+  gap: 12px;
+  padding: var(--pt) 0 var(--pb);
 }
 
 .vault-facade__base {
@@ -575,7 +590,7 @@
   background:
     linear-gradient(180deg, rgb(255 190 110 / 22%), rgb(0 0 0 / 50%)),
     var(--vault-grain) 0 0 / 300px 300px,
-    #3a2412;
+    #2a190c;
   background-blend-mode: normal, soft-light, normal;
   box-shadow: 0 20px 40px rgb(0 0 0 / 80%);
 }
@@ -596,25 +611,25 @@
 }
 
 .vault-row--upper {
-  grid-template-columns: 52px minmax(0, 1fr) 52px minmax(0, 1fr) 52px minmax(0, 1fr) 52px;
+  grid-template-columns: var(--pw) minmax(0, 1fr) var(--pw) minmax(0, 1fr) var(--pw) minmax(0, 1fr) var(--pw);
 }
 
 .vault-row--lower {
-  grid-template-columns: minmax(0, 0.62fr) 52px minmax(0, 1.4fr) 52px minmax(0, 1.4fr) 52px minmax(0, 0.62fr);
+  grid-template-columns: minmax(0, 0.62fr) var(--pw) minmax(0, 1.4fr) var(--pw) minmax(0, 1.4fr) var(--pw) minmax(0, 0.62fr);
 }
 
 .vault-row--single {
-  grid-template-columns: 52px minmax(0, 1fr) 52px;
+  grid-template-columns: var(--pw) minmax(0, 1fr) var(--pw);
 }
 
 /* Pillars: dressed stone with a column of carved glyphs and a wall sconce. */
 .vault-pillar {
   position: relative;
-  margin: -16px 0 -10px;
+  margin: calc(var(--pt) * -1) 0 calc(var(--pb) * -1);
   background:
     linear-gradient(90deg, rgb(0 0 0 / 70%), rgb(255 200 140 / 16%) 22%, rgb(255 200 140 / 6%) 55%, rgb(0 0 0 / 65%)),
     var(--vault-grain) 30px 0 / 300px 300px,
-    #4b2e17;
+    #34200f;
   background-blend-mode: normal, soft-light, normal;
   box-shadow: inset 0 14px 0 rgb(0 0 0 / 25%), inset 0 -14px 0 rgb(0 0 0 / 25%);
 }
@@ -631,11 +646,11 @@
 }
 
 .vault-pillar::before {
-  top: 16px;
+  top: var(--pt);
 }
 
 .vault-pillar::after {
-  bottom: 10px;
+  bottom: var(--pb);
 }
 
 .vault-pillar__glyphs {
@@ -667,11 +682,11 @@
 /* Blank carved wall at the ends of the lower gallery */
 .vault-bay {
   position: relative;
-  margin: -16px 0 -10px;
+  margin: calc(var(--pt) * -1) 0 calc(var(--pb) * -1);
   background:
     radial-gradient(ellipse 80% 50% at 50% 60%, rgb(var(--vault-torch) / 12%), transparent 70%),
     var(--vault-grain) 0 0 / 300px 300px,
-    #3c2513;
+    #2b1a0e;
   background-blend-mode: screen, soft-light, normal;
   box-shadow: inset 0 0 30px rgb(0 0 0 / 60%);
 }
@@ -697,7 +712,7 @@
   min-width: 0;
   min-height: 0;
   grid-template-rows: minmax(0, 1fr) auto;
-  gap: 8px;
+  gap: 0;
   padding: 0 6px;
   border: 0;
   color: var(--parchment);
@@ -720,11 +735,11 @@
   display: block;
   min-height: 0;
   padding: 11px;
-  border-radius: 48% 48% 4px 4px / 64px 64px 4px 4px;
+  border-radius: 50% 50% 4px 4px / 36% 36% 4px 4px;
   background:
     linear-gradient(135deg, rgb(255 206 150 / 26%), transparent 36%, transparent 64%, rgb(0 0 0 / 60%)),
     var(--vault-grain) 0 0 / 300px 300px,
-    #54331a;
+    #3e2514;
   background-blend-mode: normal, soft-light, normal;
   box-shadow:
     0 0 0 1px rgb(0 0 0 / 80%),
@@ -737,13 +752,14 @@
   inset: 11px;
   display: block;
   overflow: hidden;
-  border-radius: 46% 46% 2px 2px / 56px 56px 2px 2px;
+  border-radius: 50% 50% 2px 2px / 35% 35% 2px 2px;
   background:
-    radial-gradient(ellipse 70% 58% at 50% 6%, rgb(var(--n-light) / 30%), transparent 70%),
+    radial-gradient(ellipse 70% 58% at 50% 6%, rgb(var(--n-light) / 24%), transparent 70%),
     radial-gradient(ellipse 60% 40% at 50% 92%, rgb(var(--n-light) / 20%), transparent 70%),
+    linear-gradient(rgb(8 5 3 / 78%), rgb(8 5 3 / 78%)),
     var(--vault-rock) 0 0 / 360px 360px,
-    #1d1109;
-  background-blend-mode: screen, screen, normal, normal;
+    #0b0704;
+  background-blend-mode: screen, screen, normal, normal, normal;
   box-shadow:
     inset 0 22px 34px rgb(0 0 0 / 86%),
     inset 14px 0 26px rgb(0 0 0 / 60%),
@@ -789,7 +805,7 @@
   height: 90%;
   transform: translateX(-50%);
   clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%);
-  background: linear-gradient(180deg, rgb(var(--n-hot) / 40%), rgb(var(--n-light) / 16%) 55%, rgb(var(--n-light) / 4%));
+  background: linear-gradient(180deg, rgb(var(--n-hot) / 30%), rgb(var(--n-light) / 10%) 55%, rgb(var(--n-light) / 2%));
   mix-blend-mode: screen;
   filter: blur(6px);
   animation: vault-flicker var(--flick, 3.1s) ease-in-out infinite alternate;
@@ -803,7 +819,7 @@
   height: 74%;
   transform: translateX(-50%);
   border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 60%, rgb(var(--n-light) / 44%), rgb(var(--n-light) / 12%) 45%, transparent 70%);
+  background: radial-gradient(ellipse at 50% 60%, rgb(var(--n-light) / 26%), rgb(var(--n-light) / 7%) 45%, transparent 70%);
   mix-blend-mode: screen;
 }
 
@@ -832,13 +848,11 @@
    and painted variants isolate their own stacking context and paint a soft black pool
    (via ::before) directly behind the image — otherwise "lighten" blends against the
    torch-lit rock behind it and the object washes out into a pale, tinted ghost. */
-.niche__display--float,
-.niche__display--painted {
+.niche__display--float {
   isolation: isolate;
 }
 
-.niche__display--float::before,
-.niche__display--painted::before {
+.niche__display--float::before {
   position: absolute;
   inset: 4% 6%;
   content: "";
@@ -957,11 +971,55 @@
     linear-gradient(180deg, transparent 60%, rgb(0 0 0 / 45%));
 }
 
-/* A painted niche render, when one exists, replaces the object presentation. */
+/* The painted render: a lit museum object on pure black, the hero of its niche. It fills most of
+   the niche (the black margin is cropped by the recess) and the black ground is blended away with
+   mix-blend-mode: screen against the niche's own light. So that blend can see the niche behind it,
+   nothing between the recess and the image may create a stacking context: the entrance dimming,
+   hover lift and filtered-out dimming are all applied to the image itself, not to .niche__display. */
+.niche__display--painted {
+  inset: 0;
+  display: block;
+}
+
 .niche__display--painted .niche__object {
-  height: 100%;
+  position: absolute;
+  bottom: 15%;
+  left: 50%;
   width: auto;
-  mix-blend-mode: lighten;
+  max-width: none;
+  height: 84%;
+  max-height: none;
+  aspect-ratio: 1;
+  translate: -50% 0;
+  mix-blend-mode: screen;
+  object-fit: contain;
+  transition: translate 500ms var(--vault-ease), filter 600ms ease;
+}
+
+.vault-stage:not(.is-lit) .niche__display--painted,
+.niche.is-dimmed .niche__display--painted,
+.niche:hover .niche__display--painted,
+.niche:focus-visible .niche__display--painted {
+  filter: none;
+  transform: none;
+}
+
+.vault-stage:not(.is-lit) .niche__display--painted .niche__object {
+  filter: brightness(0.4);
+}
+
+.vault-stage.is-lit .niche__display--painted .niche__object {
+  transition: translate 500ms var(--vault-ease), filter 650ms var(--vault-ease) calc(var(--i, 0) * 90ms + 140ms);
+}
+
+.niche:hover .niche__display--painted .niche__object,
+.niche:focus-visible .niche__display--painted .niche__object {
+  translate: -50% -3px;
+  filter: brightness(1.12);
+}
+
+.niche.is-dimmed .niche__display--painted .niche__object {
+  filter: brightness(0.22) grayscale(0.6);
 }
 
 .niche__plinth {
@@ -1029,12 +1087,13 @@
 .niche__plaque {
   position: relative;
   display: flex;
-  min-height: 52px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
-  width: min(84%, 260px);
-  margin: 0 auto;
-  padding: 10px 18px;
+  z-index: 2;
+  width: min(88%, 280px);
+  margin: -24px auto 0;
+  padding: 7px 14px;
   border: 1px solid rgb(var(--n-light) / 50%);
   background:
     linear-gradient(180deg, rgb(58 42 27 / 40%), rgb(7 6 5 / 94%)),
@@ -1643,30 +1702,14 @@
    Tablet and phone: the panel becomes a bottom sheet
    -------------------------------------------------------------------------- */
 
-@media (max-width: 1050px) {
+@media (max-width: 1300px), (max-aspect-ratio: 1/1) {
   .page--artifacts .vault-stage {
     grid-template-columns: minmax(0, 1fr);
-    height: auto;
-    min-height: calc(100svh - var(--header-height));
   }
 
-  .page--artifacts .vault-stage__filters {
-    grid-column: 1;
-    margin-left: 0;
-  }
-
+  .page--artifacts .vault-stage__filters,
   .page--artifacts .vault-stage__niches {
     grid-column: 1;
-    min-height: 620px;
-  }
-
-  .vault-facade {
-    width: 100%;
-    translate: none;
-  }
-
-  .vault-wall--left {
-    width: 90px;
   }
 
   .vault-stairs,
@@ -1681,8 +1724,8 @@
     bottom: 0;
     left: 0;
     display: flex;
-    width: min(100%, 640px);
-    max-height: 86svh;
+    width: min(100%, 720px);
+    max-height: min(86svh, 940px);
     margin: 0 auto;
     transform: translateY(104%);
     visibility: hidden;
@@ -1734,9 +1777,76 @@
   }
 }
 
+/* --------------------------------------------------------------------------
+   Tall layout: portrait windows (the owner's 1070x1741) and short ones. The wall takes the full
+   width and uses the height: niche arches are tall, so every artifact is big instead of the whole
+   wall shrinking to a strip in the middle of the screen. Phones (<= 760px) have their own stacked
+   layout below.
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 761px) and ((max-aspect-ratio: 1/1) or (max-height: 600px)) {
+  .page--artifacts .vault-stage {
+    height: auto;
+    min-height: calc(100svh - var(--header-height));
+    grid-template-rows: 48px 1fr;
+    padding-inline: clamp(10px, 1.6vw, 24px);
+  }
+
+  /* The wall fills the width here, so the painted wall behind it is dimmed almost to black. */
+  .vault-scene__painted::after {
+    background: linear-gradient(180deg, rgb(5 4 3 / 84%) 0, rgb(5 4 3 / 88%) 60%, rgb(5 4 3 / 90%) 77%, transparent 87%);
+  }
+
+  /* On a tall window the wall settles low, standing just above the painted floor. */
+  .vault-hall {
+    align-items: center;
+    padding-bottom: 16svh;
+  }
+
+  .vault-facade {
+    --pw: clamp(30px, 3.8vw, 46px);
+    --pt: 20px;
+    --pb: 12px;
+    width: min(100%, 1180px);
+    max-height: none;
+    aspect-ratio: auto;
+    grid-template-rows: 34px auto 26px;
+  }
+
+  .vault-facade__rows {
+    grid-template-rows: auto auto;
+    gap: 20px;
+    padding: var(--pt) 0 var(--pb);
+  }
+
+  .niche {
+    grid-template-rows: auto auto;
+    gap: 0;
+  }
+
+  .niche__arch {
+    aspect-ratio: 0.78;
+  }
+
+  .niche__title {
+    font-size: clamp(0.8rem, 1.5vw, 1rem);
+  }
+
+  .niche__plaque {
+    min-height: 52px;
+  }
+}
+
 @media (max-width: 760px) {
+  /* The phone header is tall: keep the sheet below it so it never runs under the search field. */
+  .page--artifacts .vault-panel {
+    max-height: calc(100svh - 176px);
+  }
+
   .page--artifacts .vault-stage {
     display: block;
+    height: auto;
+    min-height: calc(100svh - var(--header-height));
     padding: 14px 16px 40px;
   }
 
@@ -1770,6 +1880,9 @@
   }
 
   .vault-facade {
+    width: 100%;
+    max-height: none;
+    aspect-ratio: auto;
     grid-template-rows: 26px auto 20px;
   }
 
