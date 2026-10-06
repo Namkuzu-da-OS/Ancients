@@ -11,7 +11,7 @@ OUT = r"C:\Users\Daryll\Documents\projects\Ancients\images\redesign\source"
 STATE = os.path.join(HERE, "queue-state.json")
 
 GAP = (5 * 60, 8 * 60)        # send-to-send gap, seconds
-BATCH = 10                    # sends per batch...
+BATCH = 10**6               # batch rests off (Daryll 2026-10-06: "keep going"); gap + hourly cap still apply
 REST = (45 * 60, 60 * 60)     # ...then rest this long
 HOURLY_CAP = 9                # never more than this many sends in any 60 minutes
 LIMIT_BACKOFF = 60 * 60       # ChatGPT said "limit" / no Send button
