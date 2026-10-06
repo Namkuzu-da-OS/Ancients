@@ -1,15 +1,16 @@
-// The Artifact Vault (packet 07). All words come from data/artifacts.json via the shared loader.
+// The Artifact Vault. All words come from data/artifacts.json via the shared loader.
+// The page background is a painted vault wall (wall-wide / wall-tall) with five empty lit niches.
+// The wall image, the niche hotspots and the embers all live in one geometry: layout() scales the
+// wall like `object-fit: cover`, then publishes its box as --wx/--wy/--ww/--wh (px) and --u (screen px
+// per wall-image px) on <html>. Niches are positioned in % of the wall image, so they track the art
+// exactly at every window size.
 import { loadAncientsData } from "./data.js";
 
 const FILTERS = [["all", "All"], ["mysterious", "Mysterious"], ["tools", "Tools & Weapons"], ["art", "Art & Symbols"]];
 const TAGS = { mysterious: "Mysterious", tools: "Tools & Weapons", art: "Art & Symbols" };
 const SECTIONS = [["overview", "Overview"], ["context", "Context"], ["significance", "Significance"], ["mysteries", "Mysteries"]];
-// Presentation only (how each photo sits in its niche); unknown keys fall back to a slab.
-const MODES = { "mysterious-handbags": "triptych", "egyptian-cartouches": "stele", "bronze-age-swords": "vitrine", "paleolithic-hand-axe": "float-crop", "venus-figurines": "float" };
-// Painted niche renders (images/redesign/vault/<file>.webp): each artifact as a lit museum
-// object on pure black, made in Daryll's ChatGPT window. Keyed by artifact id; the real photos
-// stay in the detail gallery. An id with no entry (or a render that fails to load) falls back to
-// the photo presentation chosen by MODES above.
+// Painted niche renders (images/redesign/vault/<file>.webp): each artifact as a lit museum object on pure
+// black, made in Daryll's ChatGPT window. Keyed by artifact id; the real photos stay in the detail gallery.
 const NICHE_RENDERS = {
   "mysterious-handbags": "images/redesign/vault/mysterious-handbags.webp",
   "egyptian-cartouches": "images/redesign/vault/egyptian-cartouches.webp",
@@ -17,105 +18,156 @@ const NICHE_RENDERS = {
   "paleolithic-hand-axe": "images/redesign/vault/paleolithic-hand-axe.webp",
   "venus-figurines": "images/redesign/vault/venus-figurines.webp",
 };
-const GLYPHS = ["vg-bird", "vg-eye", "vg-ankh", "vg-owl", "vg-pillar-h", "vg-spiral", "vg-sun"];
+// Frame 3 order: top row hand axe, Venus, swords; bottom row cartouche, handbags. Anything else follows.
+const ORDER = ["paleolithic-hand-axe", "venus-figurines", "bronze-age-swords", "egyptian-cartouches", "mysterious-handbags"];
+// Niche interiors as [x0, x1, y0, y1] in % of the wall image, measured on the PNGs (empty plinth top = y1).
+// plaque: [offset below the niche foot, height] in wall-image px. embers: torch/brazier points in wall-image px.
+const WALLS = {
+  wide: {
+    w: 1672, h: 941,
+    slots: [[18.3, 29.0, 21.4, 41.8], [36.0, 45.5, 21.4, 41.8], [52.0, 61.5, 21.4, 41.8], [23.7, 35.5, 53.0, 70.6], [45.5, 57.5, 53.0, 70.6]],
+    plaque: [[30, 40], [30, 40], [30, 40], [38, 40], [38, 40]],
+    embers: [[245, 760], [1135, 745], [270, 385], [1105, 380], [1640, 665], [255, 105], [800, 100], [1085, 120]],
+  },
+  tall: {
+    w: 1024, h: 1536,
+    slots: [[20.5, 35.2, 25.6, 41.1], [45.5, 61.3, 25.6, 41.1], [71.4, 87.1, 25.6, 41.1], [28.0, 46.8, 48.8, 64.9], [61.3, 79.8, 48.8, 64.9]],
+    plaque: [[30, 40], [30, 40], [30, 40], [32, 40], [32, 40]],
+    embers: [[150, 1100], [990, 1095], [165, 625], [955, 630], [180, 270], [685, 275], [945, 270]],
+  },
+};
+const OBJ_SPAN = { h: 0.88, bottom: -0.032 }; // the render's square box, in niche heights: ~82% object height, base on the plinth
 
 const stage = document.querySelector(".vault-stage");
-const rows = document.querySelector(".vault-facade__rows");
+const wallbox = document.querySelector(".vault-wallbox");
 const panel = document.querySelector(".vault-panel");
 const scrim = document.querySelector(".vault-scrim");
+const root = document.documentElement;
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 // Side panel only on a landscape desktop window; anywhere narrower or taller than wide the
 // panel is a bottom sheet (keep in step with the layout breakpoint in vault.css).
 const sheetQuery = matchMedia("(max-width: 1300px), (max-aspect-ratio: 1/1)");
+const phoneQuery = matchMedia("(max-width: 760px)");
 const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
 const imagesOf = (a) => a.images ?? (a.image ? [a.image] : []);
-const probe = (src) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(true); i.onerror = () => ok(false); i.src = src; });
 const img = (src, cls, alt = "") => { const i = el("img", cls); i.alt = alt; i.decoding = "async"; i.onerror = () => i.classList.add("is-missing"); i.src = src; return i; };
-const flame = (azure) => { const f = el("span", "vault-flame" + (azure ? " is-azure" : "")); f.dataset.emberSource = ""; f.style.setProperty("--flick", (2 + Math.random() * 1.6).toFixed(2) + "s"); f.append(el("i"), el("i"), el("i")); return f; };
 
 let entries = [], current = null, imageIndex = 0, opener = null;
+let wallMode = "wide", emberPts = [];
 
-const BAY_GLYPHS = [["vg-sun", "vg-serpent"], ["vg-bull", "vg-eye"]];
-function bay(side) {
-  const b = el("div", "vault-bay"); b.setAttribute("aria-hidden", "true");
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("class", "vault-relief vault-bay__relief"); svg.setAttribute("viewBox", "0 0 100 240"); svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
-  BAY_GLYPHS[side].forEach((g, k) => { const u = document.createElementNS("http://www.w3.org/2000/svg", "use"); u.setAttribute("href", "#" + g); u.setAttribute("x", "10"); u.setAttribute("y", String(20 + k * 110)); u.setAttribute("width", "80"); u.setAttribute("height", "90"); svg.append(u); });
-  b.append(svg);
-  return b;
+// ---- the wall: one geometry for the painted image, the niche hotspots and the embers ----
+function layout() {
+  const vw = innerWidth, vh = innerHeight, stacked = phoneQuery.matches;
+  const mode = stacked || vw / vh < 1.1 ? "tall" : "wide";
+  const cfg = WALLS[mode], W = cfg.w, H = cfg.h;
+  const xs = cfg.slots.map((r) => r[0] / 100 * W), xe = cfg.slots.map((r) => r[1] / 100 * W);
+  const bx0 = Math.min(...xs), bx1 = Math.max(...xe);
+  const by0 = Math.min(...cfg.slots.map((r) => r[2] / 100 * H));
+  const by1 = Math.max(...cfg.slots.map((r, k) => r[3] / 100 * H + cfg.plaque[k][0] + cfg.plaque[k][1]));
+  const panelOn = !stacked && !sheetQuery.matches;
+  const cover = Math.max(vw / W, vh / H);
+  let u = cover, ox, oy;
+  if (stacked) {
+    ox = (vw - W * u) / 2; oy = (vh - H * u) / 2;
+  } else {
+    if (!panelOn) u = Math.min(cover * 1.25, Math.max(cover, vw / 2 / ((bx0 + bx1) / 2))); // zoom just enough to centre the wall
+    const w = W * u, h = H * u;
+    const shellRight = (vw + Math.min(vw, 1680)) / 2, panelW = Math.min(430, Math.max(330, 0.256 * vw));
+    const panelLeft = shellRight - 24 - panelW;
+    ox = panelOn ? Math.min(0, panelLeft - 30 - u * bx1) : vw / 2 - u * (bx0 + bx1) / 2;
+    ox = Math.min(0, Math.max(vw - w, ox));
+    const header = parseFloat(getComputedStyle(root).getPropertyValue("--header-height")) || 126;
+    oy = header + (vh - header) / 2 + 8 - u * (by0 + by1) / 2;
+    oy = Math.max(oy, 196 - u * by0);
+    oy = Math.min(0, Math.max(vh - h, oy));
+  }
+  wallMode = mode;
+  const set = (k, v) => root.style.setProperty(k, v);
+  set("--wx", ox.toFixed(2) + "px"); set("--wy", oy.toFixed(2) + "px"); set("--ww", (W * u).toFixed(2) + "px"); set("--wh", (H * u).toFixed(2) + "px"); set("--u", u.toFixed(5));
+  set("--fx", (ox + u * (bx0 + bx1) / 2).toFixed(1) + "px");
+  // The niche layer is absolutely positioned inside the stage (not fixed: a fixed layer is its own stacking
+  // context and the screen-blended renders could no longer see the painted wall behind them).
+  const sr = stage.getBoundingClientRect();
+  set("--bx", (ox - sr.left - scrollX).toFixed(2) + "px"); set("--by", (oy - sr.top - scrollY).toFixed(2) + "px");
+  document.querySelectorAll(".vault-scene__wall").forEach((i) => { i.hidden = i.dataset.wall !== mode; });
+  stage.classList.toggle("is-stacked", stacked);
+  stage.dataset.wall = mode;
+  emberPts = cfg.embers.map(([x, y]) => [ox + x * u, oy + y * u]);
+  placeNiches();
 }
 
-function pillar(n) {
-  const p = el("div", "vault-pillar"); p.setAttribute("aria-hidden", "true");
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("class", "vault-relief vault-pillar__glyphs"); svg.setAttribute("viewBox", "0 0 40 240"); svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
-  for (let k = 0; k < 4; k++) { const u = document.createElementNS("http://www.w3.org/2000/svg", "use"); u.setAttribute("href", "#" + GLYPHS[(n * 3 + k) % GLYPHS.length]); u.setAttribute("x", "4"); u.setAttribute("y", String(4 + k * 60)); u.setAttribute("width", "32"); u.setAttribute("height", "52"); svg.append(u); }
-  p.append(svg);
-  if (n % 2 === 1) { const s = el("span", "vault-sconce"); s.append(flame(false)); p.append(s); }
-  return p;
+function placeNiches() {
+  const cfg = WALLS[wallMode];
+  document.querySelectorAll(".niche").forEach((n) => {
+    const k = Number(n.dataset.slot), [x0, x1, y0, y1] = cfg.slots[k], [pdy, pdh] = cfg.plaque[k];
+    n.style.setProperty("--nx", x0 + "%"); n.style.setProperty("--ny", y0 + "%");
+    n.style.setProperty("--nw", (x1 - x0) + "%"); n.style.setProperty("--nh", (y1 - y0) + "%");
+    n.style.setProperty("--pdy", pdy); n.style.setProperty("--pdh", pdh);
+  });
 }
 
-function photoDisplay(a, mode) {
-  const srcs = imagesOf(a), d = el("span", "niche__display");
-  if (mode === "triptych") {
-    d.classList.add("niche__display--triptych");
-    const side = srcs[1] ?? srcs[0];
-    [["side", side, "20% 30%"], ["main", srcs[0], "30% 50%"], ["side", side, "80% 70%"]].forEach(([k, s, pos]) => { const slab = el("span", "niche__slab niche__slab--" + k); const i = img(s, "niche__object"); i.style.objectPosition = pos; slab.append(i); d.append(slab); });
-  } else if (mode === "stele") { d.classList.add("niche__display--stele"); const s = el("span", "niche__slab"); s.append(img(srcs[0], "niche__object")); d.append(s); }
-  else if (mode === "vitrine") { d.classList.add("niche__display--vitrine"); const v = el("span", "niche__vitrine"); v.append(img(srcs[0], "niche__object")); d.append(v); }
-  else if (mode?.startsWith("float")) { d.classList.add("niche__display--float"); if (mode === "float-crop") { d.classList.add("is-cropped"); d.style.setProperty("--crop", "0% 50%"); } d.append(img(srcs[0], "niche__object")); }
-  else { d.classList.add("niche__display--stele"); const s = el("span", "niche__slab"); s.append(img(srcs[0], "niche__object")); d.append(s); }
-  return d;
-}
-
-// The painted render is the hero object in its niche. Its black ground is blended away in CSS
-// (screen), so the object simply sits in the niche's light. If the file fails, fall back to the photo.
-function display(key, a, mode) {
-  const src = NICHE_RENDERS[key];
-  if (!src) return photoDisplay(a, mode);
-  const d = el("span", "niche__display niche__display--painted");
-  const i = img(src, "niche__object", "");
-  i.onerror = () => d.replaceWith(photoDisplay(a, mode));
-  d.append(i);
-  return d;
+// The renders sit on pure black. Screen-blending that onto the (bright, amber) painted niche washes the object
+// out, so each render is keyed once into a true cut-out: black that is connected to the image border becomes
+// transparent (soft edge, colour un-matted), black enclosed by the object stays opaque.
+const cutouts = new Map();
+function cutout(src) {
+  if (!cutouts.has(src)) cutouts.set(src, new Promise((ok, fail) => {
+    const im = new Image(); im.decoding = "async";
+    im.onerror = fail;
+    im.onload = () => {
+      try {
+        const N = 720, c = document.createElement("canvas"); c.width = c.height = N;
+        const g = c.getContext("2d", { willReadFrequently: true }); g.drawImage(im, 0, 0, N, N);
+        const d = g.getImageData(0, 0, N, N), px = d.data, T = 38, LO = 5;
+        const mx = (k) => Math.max(px[k], px[k + 1], px[k + 2]);
+        const bg = new Uint8Array(N * N), stack = new Int32Array(N * N); let sp = 0;
+        const push = (x, y) => { const q = y * N + x; if (!bg[q] && mx(q * 4) <= T) { bg[q] = 1; stack[sp++] = q; } };
+        for (let x = 0; x < N; x++) { push(x, 0); push(x, N - 1); }
+        for (let y = 0; y < N; y++) { push(0, y); push(N - 1, y); }
+        while (sp) { const q = stack[--sp], x = q % N, y = (q / N) | 0; if (x > 0) push(x - 1, y); if (x < N - 1) push(x + 1, y); if (y > 0) push(x, y - 1); if (y < N - 1) push(x, y + 1); }
+        for (let q = 0; q < N * N; q++) {
+          if (!bg[q]) continue;
+          const k = q * 4, m = mx(k), t = Math.min(1, Math.max(0, (m - LO) / (T - LO)));
+          // soft glow only: fade it out toward the square's edge so no hard edge of the render shows
+          const x = q % N, y = (q / N) | 0, e = Math.min(1, Math.min(x, y, N - 1 - x, N - 1 - y) / (N * 0.05)), al = t * t * (3 - 2 * t) * e * e;
+          const f = al > 0.02 ? 1 / al : 0;
+          px[k] = Math.min(255, px[k] * f); px[k + 1] = Math.min(255, px[k + 1] * f); px[k + 2] = Math.min(255, px[k + 2] * f); px[k + 3] = al * 255;
+        }
+        g.putImageData(d, 0, 0);
+        c.toBlob((b) => (b ? ok(URL.createObjectURL(b)) : fail(new Error("toBlob"))), "image/png");
+      } catch (e) { fail(e); }
+    };
+    im.src = src;
+  }));
+  return cutouts.get(src);
 }
 
 function niche(key, a, i) {
   const mysterious = a.category.includes("mysterious");
-  const b = el("button", "niche" + (mysterious ? " is-mysterious" : "")); b.type = "button"; b.dataset.key = key; b.style.setProperty("--i", i); b.setAttribute("aria-pressed", "false");
-  const arch = el("span", "niche__arch"), recess = el("span", "niche__recess"), lights = el("span", "niche__lights");
-  const cone = el("span", "niche__cone"); cone.style.setProperty("--flick", (2.6 + i * 0.37).toFixed(2) + "s");
-  lights.append(el("span", "niche__halo"), cone, el("span", "niche__lamp"));
-  const cl = el("span", "niche__candle niche__candle--l"), cr = el("span", "niche__candle niche__candle--r"); cl.append(flame(mysterious)); cr.append(flame(mysterious));
-  recess.append(lights, el("span", "niche__step"), el("span", "niche__plinth"), display(key, a, MODES[key]), cl, cr);
-  arch.append(recess);
+  const b = el("button", "niche" + (mysterious ? " is-mysterious" : "")); b.type = "button"; b.dataset.key = key; b.dataset.slot = i; b.style.setProperty("--i", i); b.setAttribute("aria-pressed", "false");
+  const light = el("span", "niche__light"); light.style.setProperty("--flick", (3 + i * 0.41).toFixed(2) + "s");
+  b.append(light);
+  const src = NICHE_RENDERS[key] ?? imagesOf(a)[0];
+  const o = el("img", "niche__object" + (NICHE_RENDERS[key] ? " is-pending" : " is-photo")); o.alt = ""; o.decoding = "async"; o.onerror = () => o.classList.add("is-missing");
+  if (NICHE_RENDERS[key]) cutout(src).then((u) => { o.src = u; o.classList.remove("is-pending"); }).catch(() => { o.src = src; o.classList.remove("is-pending"); o.classList.add("is-screen"); });
+  else o.src = src;
+  b.append(o, el("span", "niche__veil"), el("span", "niche__rim"));
   const plaque = el("span", "niche__plaque"); plaque.append(el("span", "niche__title", a.title));
-  b.append(arch, plaque);
+  b.append(plaque);
   b.addEventListener("click", () => { if (!b.classList.contains("is-dimmed")) select(key, true, b); });
   return b;
 }
 
 function build(artifacts) {
-  entries = Object.entries(artifacts);
-  const upper = entries.slice(0, 3), lower = entries.slice(3);
-  rows.replaceChildren();
-  let p = 0;
-  const row = (list, cls, bays) => {
-    const r = el("div", "vault-row " + cls);
-    if (bays) r.append(bay(0));
-    r.append(pillar(p++));
-    list.forEach(([k, a]) => { r.append(niche(k, a, entries.findIndex(([x]) => x === k)), pillar(p++)); });
-    if (bays) r.append(bay(1));
-    rows.append(r);
-  };
-  row(upper, upper.length === 3 ? "vault-row--upper" : "vault-row--single", false);
-  if (lower.length) row(lower, lower.length === 2 ? "vault-row--lower" : "vault-row--upper", lower.length === 2);
-
+  const all = Object.entries(artifacts);
+  entries = [...ORDER.map((k) => all.find(([x]) => x === k)).filter(Boolean), ...all.filter(([x]) => !ORDER.includes(x))].slice(0, 5);
+  wallbox.replaceChildren(...entries.map(([k, a], i) => niche(k, a, i)));
   const nav = document.querySelector(".vault-filters");
   FILTERS.forEach(([value, label], n) => {
     const f = el("button", "vault-filter", label); f.type = "button"; f.dataset.filter = value; f.setAttribute("aria-pressed", String(n === 0));
     f.addEventListener("click", () => applyFilter(value)); nav.append(f);
   });
+  layout();
 }
 
 function applyFilter(value) {
@@ -194,23 +246,15 @@ function wire() {
   g.addEventListener("pointerup", (e) => { if (x0 != null && Math.abs(e.clientX - x0) > 40) showImage(imageIndex + (e.clientX < x0 ? 1 : -1)); x0 = null; });
 }
 
-function stars() {
-  const c = document.querySelector(".vault-scene__stars"); if (!c) return;
-  const r = c.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
-  c.width = r.width * dpr; c.height = r.height * dpr; const x = c.getContext("2d"); x.scale(dpr, dpr);
-  for (let k = 0; k < 260; k++) { const s = Math.random() ** 3 * 1.6 + 0.3; x.fillStyle = `rgba(${220 + Math.random() * 35},${215 + Math.random() * 30},255,${0.35 + Math.random() * 0.6})`; x.beginPath(); x.arc(Math.random() * r.width, Math.random() * r.height, s, 0, 7); x.fill(); }
-}
-
 function embers() {
   if (reduced) return;
   const c = document.querySelector(".vault-scene__embers"), ctx = c.getContext("2d"); const ps = [];
   const size = () => { c.width = innerWidth; c.height = innerHeight; }; size(); addEventListener("resize", size);
   const tick = () => {
     if (!document.hidden) {
-      const src = [...document.querySelectorAll(".vault-brazier[data-ember-source], .vault-sconce .vault-flame")];
-      if (src.length && ps.length < 90 && Math.random() < 0.5) {
-        const r = src[(Math.random() * src.length) | 0].getBoundingClientRect();
-        if (r.width) ps.push({ x: r.left + r.width / 2 + (Math.random() - 0.5) * 14, y: r.top + 10, vx: (Math.random() - 0.5) * 0.4, vy: -0.4 - Math.random() * 0.9, life: 1, s: Math.random() * 1.6 + 0.6 });
+      if (emberPts.length && ps.length < 110 && Math.random() < 0.55) {
+        const [x, y] = emberPts[(Math.random() * emberPts.length) | 0], u = parseFloat(root.style.getPropertyValue("--u")) || 1;
+        ps.push({ x: x + (Math.random() - 0.5) * 16 * u, y, vx: (Math.random() - 0.5) * 0.4, vy: -0.4 - Math.random() * 0.9, life: 1, s: (Math.random() * 1.5 + 0.6) * Math.max(0.8, u) });
       }
       ctx.clearRect(0, 0, c.width, c.height);
       for (let k = ps.length - 1; k >= 0; k--) {
@@ -226,14 +270,12 @@ function embers() {
 
 loadAncientsData().then(({ artifacts }) => {
   build(artifacts); wire(); applyFilter("all");
-  select(entries[0][0], false);
-  stars(); embers();
+  select(entries.find(([k]) => k === "mysterious-handbags")?.[0] ?? entries[0][0], false);
+  embers();
+  addEventListener("resize", layout);
+  phoneQuery.addEventListener("change", layout);
+  sheetQuery.addEventListener("change", layout);
   requestAnimationFrame(() => stage.classList.add("is-lit"));
-  probe("images/redesign/vault/background.webp").then((ok) => {
-    if (!ok) return;
-    document.querySelector(".vault-scene__painted").style.backgroundImage = 'url("images/redesign/vault/background.webp")';
-    stage.classList.add("has-painted-bg");
-  });
 }).catch((err) => {
   const s = document.querySelector(".vault-hall__status"); if (s) s.textContent = "The vault could not be opened: the artifact records did not load. Serve the site over http and reload.";
   console.error("[Vault]", err);

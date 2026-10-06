@@ -351,3 +351,53 @@ painted stairs/braziers are mostly dimmed away behind the wall. At 1280x800 the 
 
 **Unverified:** Safari/Firefox (`backdrop-filter` with a composite mask, `overflow: clip`, `mix-blend-mode` on the img);
 real touch on the sheet; `prefers-reduced-motion` run; widths between 761 and 1000px were not screenshotted.
+
+## Vault pass 4 (Sonnet): painted wall
+
+**What changed** (`artifacts.html`, `css/redesign/vault.css` rewritten, `js/redesign/vault.js`):
+- The painted wall IS the background. `wall-wide.webp` (1672x941) for landscape, `wall-tall.webp` (1024x1536) for portrait and phones'
+  backdrop. The old code-drawn wall (facade, pillars, glyph sprite, stairs, floor, braziers, flames, blur halo, `background.webp`
+  dimming) is gone from HTML, CSS and JS.
+- One geometry. `layout()` in vault.js scales the wall like `object-fit: cover`, then publishes `--wx/--wy/--ww/--wh` (box in px) and
+  `--u` (screen px per image px) on `<html>`. The wall `<img>`, the niche layer (`.vault-wallbox`) and the embers all use that box;
+  each niche is positioned in % of the wall image (`WALLS.*.slots`, taken from the coordinator's numbers and checked by overlay on
+  both PNGs: they fit), so the objects cannot drift from the art. Plaques are sized in `--u`. Resize and breakpoint changes re-run it.
+- Anchoring: with the side panel (landscape > 1300px) the wall is pushed left just enough to clear the panel; with the sheet it is
+  centred (wide wall zoomed up to 25% over cover if needed, so 1280x800 still centres it); vertically it sits between the header and
+  the bottom, never under the filter strip. Wall choice is by window shape (aspect < 1.1 = tall, else wide), not width alone: tall at
+  1280x800 would crop away the bottom row.
+- Frame 3 order: Hand Axe / Venus / Swords, then Cartouche / Handbags. Each niche is a focusable button over its painted niche; hover
+  and focus brighten the light and draw a gold hairline (blue for handbags), selection keeps the hairline. Filters dim non-matching
+  niches (veil + darkened object). Handbags niche: the amber interior is tinted blue (`mix-blend-mode: color`) plus blue glow.
+- Cut-outs, not blend modes: screen-blending the black renders onto the bright amber niche washed them out to ghosts. `cutout()`
+  keys each render once at load (flood-fill of black connected to the image border becomes soft transparent, colour un-matted; black
+  enclosed by the object stays opaque) and uses the result as the niche image. Falls back to a screen blend if canvas keying fails.
+  Source files are untouched.
+- Objects are 81-84% of niche height, centred horizontally, base on the plinth.
+- Phones (<=760px): the stacked layout stays; the tall wall is a dimmed backdrop and the niches are lit arch cards.
+- Kept: filters, panel above 1300px / bottom sheet below, gallery, arrows, Esc, header, nav. The sheet and panel logic is untouched.
+
+**Measured** (niche rect vs object, getBoundingClientRect; object bbox from the render's non-black pixels). Horizontal offset of every
+object from its niche centre is 0px at every size. Vertical: the object stands on the plinth, so its centre sits below the niche
+centre (dyCenter) while its foot is on the plinth line (footGap = foot minus niche bottom, -3..+2px).
+
+| window | mode | niche size (top / bottom row) | object height | dx | dyCenter | footGap |
+|---|---|---|---|---|---|---|
+| 1070x1741 | tall | 171-183x270 / 215-218x280 | 218-229 px | 0 | 24-25 | -2..+2 |
+| 1280x800 | wide (zoom 1.13) | 152-172x184 / 189-192x159 | 129-154 px | 0 | 13-17 | -1..+1 |
+| 1440x900 | wide | 152-171x184 / 189-192x158 | 128-154 px | 0 | 13-17 | -1..+1 |
+| 1672x941 | wide | 159-179x192 / 197-201x166 | 134-161 px | 0 | 14-18 | -1..+1 |
+| 390x844 | stacked cards | 346x300 | 241-249 px | 0 | 25-27 | -3..+1 |
+
+Console: zero errors at all five sizes. `node tools/verify-content.mjs` passes. Click opens the sheet with the right artifact, close
+button and Esc close it, ArrowRight moves the gallery, "Mysterious" leaves only the handbags lit (1070x1741, 1280x800; panel column
+at 1672x941). Screenshots: `docs/redesign/review/vault-pass4-<w>.png`, side by side with frame 3:
+`vault-pass4-vs-frame3-1672.png`, `vault-pass4-vs-frame3-1070.png`.
+
+**Honest comparison with frame 3:** the wall, staircase, braziers, hieroglyph pillars, lit niches and star floor now match the frame
+in richness (they are the same painting language). Remaining differences: the frame's objects are ~10-15% larger and more strongly
+lit, its handbags niche shows three slabs with a stronger blue wash, and its plaques glow more. At 1280x800 the objects are ~150px
+because the header takes 126px of height.
+
+**Unverified:** Safari/Firefox (`mix-blend-mode: color`, `overflow: clip`, canvas keying); real touch; reduced motion; widths 761-1000px
+and ultra-wide (>2000px) were not screenshotted; `images/redesign/vault/background.webp` is now unused (left in place).
