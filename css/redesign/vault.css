@@ -872,12 +872,23 @@
   backdrop-filter: blur(3px);
 }
 
+/* Fixed, not absolute: an absolute grid item is boxed into its own grid column, which left
+   the "opened wide" folio stuck at the side panel's 406px (squashed title, sideways scroll). */
 .vault-stage.is-folio .vault-panel {
-  position: absolute;
-  z-index: 6;
-  inset: 6px 24px 18px;
+  position: fixed;
+  z-index: 30;
+  top: 112px;
+  bottom: 20px;
+  left: max(24px, calc(50vw - 600px));
+  right: max(24px, calc(50vw - 600px));
+  width: auto;
+  max-width: none;
   max-height: none;
   margin: 0;
+}
+
+.vault-stage.is-folio .vault-panel__body {
+  overflow-x: hidden;
 }
 
 .vault-stage.is-folio .vault-panel__body {
