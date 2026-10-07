@@ -910,6 +910,9 @@
 
 .vault-stage.is-folio .vault-panel__title {
   font-size: clamp(1.9rem, 2.4vw, 2.6rem);
+  /* QA fix: in the two-column folio the text column runs under the close button (top-right), so a long title's
+     first line ("Mysterious Handbag Symbols" at 1672px) ran into it. Keep the title clear of the 34px button. */
+  padding-right: 44px;
 }
 
 .vault-stage.is-folio .vault-panel__section p {
@@ -1008,8 +1011,15 @@
 
   .vault-stage.is-folio .vault-panel {
     position: fixed;
+    /* QA fix: the desktop folio rule above sets z-index 30 and, being more specific than the sheet's z-index 60,
+       won, which put the opened record UNDER the scrim (z 55): dimmed, blurred, and every click on it (Return to
+       the vault, gallery arrows, close) landed on the scrim, which closed the whole sheet. Seen at 1070x1741,
+       1280x800 and 390x844; the side-panel layout (z 30, scrim 4) was never affected. */
+    z-index: 60;
     inset: auto 0 0;
-    max-height: 94svh;
+    /* ... and 94svh let its top edge (and the close button) slide up under the header at 1280x800 and on phones;
+       stop below it, like the plain sheet does. */
+    max-height: calc(100svh - var(--header-height) - 8px);
   }
 
   .vault-stage.is-folio .vault-panel__body {

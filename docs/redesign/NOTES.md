@@ -401,3 +401,63 @@ because the header takes 126px of height.
 
 **Unverified:** Safari/Firefox (`mix-blend-mode: color`, `overflow: clip`, canvas keying); real touch; reduced motion; widths 761-1000px
 and ultra-wide (>2000px) were not screenshotted; `images/redesign/vault/background.webp` is now unused (left in place).
+
+## QA sweep (Sonnet): every popup, panel and overlay at five window sizes
+
+Method: own headless Chrome over CDP (never the owner's browser), 2550x1220, 1672x941, 1280x800, 1070x1741, 390x844 (390 with
+mobile emulation, so a page that is wider than the screen shows up), plus 1366x768, 1024x768, 820x1180 for the Descent and Vault and a
+few narrow landscape sizes for the Dial. For each open panel: getBoundingClientRect on the panel and its scroll body, scrollWidth vs
+clientWidth, text-line rectangles against buttons, image aspect vs natural, and `elementFromPoint` on every control (a real click must
+land on the control; the JS-click tests of earlier passes could not see a covered button).
+
+**Defects found and fixed** (CSS unless noted; every fix is commented in the file):
+- **Vault, "Explore artifact" on the bottom sheet (1070x1741, 1280x800, 390x844 and everything narrower than 1300px or portrait):**
+  the folio sat UNDER the scrim. `.vault-stage.is-folio .vault-panel { z-index: 30 }` out-ranked the sheet's z-index 60, scrim is 55.
+  Result: the open record was dimmed and blurred, and every click on it (Return to the vault, gallery arrows, close) hit the scrim,
+  which closed the whole sheet. Fixed with `z-index: 60` in the sheet media block.
+- **Vault, folio on the bottom sheet (1280x800, 390x844):** the folio's `max-height: 94svh` pushed its top edge and close button
+  under the header. Now `100svh - header - 8px`.
+- **Vault, folio two-column (1672x941, 2550x1220):** a long title ("Mysterious Handbag Symbols") ran into the close button. Title gets
+  `padding-right: 44px` in the folio.
+- **Vault, side panel (>1300px landscape):** Escape did not close it (only the folio and the sheet). `vault.js` now closes it too.
+- **Descent, phone (390, 360, 430):** the theoretical event's label ran to x=413 on a 390px screen, and the blurred label pads
+  poked 15px past the edge. `body` is `overflow-x: hidden`, but a real phone widens its layout viewport to fit (innerWidth 439 on 390),
+  so the page scrolled sideways and the event sheet was laid out 49px too wide with its close button off screen. Label width is now
+  capped by where its own marker sits, and `.descent` clips x-overflow (`overflow-x: clip`, keeps the sticky strata).
+- **Dial, 1280x800 / 1440x900 / 1672x941:** the era scrubber covered the titles of the bottom medallions (up to 30px). The ring
+  diameter is now `--ring-d`, capped by `94vh - 245px` (ring 592 -> 517 at 1280x800, 696 -> 639 at 1672x941). Gap to the scrubber
+  is now 6-19px at those sizes.
+- **Dial, 1070x1741:** a long era name made the scrubber 518px wide, on top of both the Did You Know card and the Artifacts card.
+  It is now capped to the gap between them (`--side-w`, `--side-x`) and its label wraps to two lines.
+- **Dial, Did You Know card (1280x800 and 1070x1741):** the whole card scrolled with a hidden scrollbar, so a long fact pushed
+  "Another fact" out of sight (up to 30px). Now only the fact scrolls (thin gold scrollbar); the title and the button stay.
+- **Dial, 1070x1741:** a long event made the event panel grow over the ring's top-right bezel (up to 23px). Capped at the ring's top
+  edge + 12% of its diameter on tall narrow windows; the panel's own scroll takes the rest.
+- **Dial, landscape 761-1180px (1024x768):** the ring ran under the event panel and hid medallions in 5 of 8 eras. The ring is now
+  centred in the gap between rail and panel and capped by it (`--rail-r`, `--panel-l`).
+
+**Checked and clean (no change needed):** Descent event panel for ALL 63 events at 2550, 1672, 1280, 1070, 390 and also 1366x768,
+1024x768, 820x1180 (Previous stepping through every event, `scrollWidth - clientWidth <= 1`, fully on screen, title not clipped, 16:9
+art 1:1 with its natural ratio, no control covered); the theoretical event; events with and without `details`; deep links `#<era>`
+and `#<era>-NN`, a bad `#bronzeAge-99`, hashchange, Escape, close button, real mouse click on a marker, ArrowRight in the nav;
+Descent Did You Know in all 6 eras at the five sizes, with every fact (longest included) and the refresh button; Dial event panel
+for the default and every medallion (6) in all 8 eras at the five sizes, CTA, teaser, rail, strip, scrubber, ring/window/orbit exact
+circles (width == height) at every size; Vault: all 5 artifacts x every gallery image x open / Explore artifact / Return / Escape /
+close at the five sizes plus 1366x768, 1024x768, 820x1180, all four filters. Console errors: none at any size.
+`node tools/verify-content.mjs` passes. Before/after screenshots: `docs/redesign/review/qa-<page>-<state>-before|after-<w>.png`
+(the big Dial ones are palette-quantized to keep the repo small).
+
+**Not fixed, on purpose or not testable:**
+- Dial, 761-1000px landscape and 820px portrait: the 230px side panels leave the event panel 188px of text and the ring still sits
+  close to it; the proper answer is the stacked phone layout up to ~1000px, a redesign. Ring/medallion overlaps are fixed down to
+  ~900px; at 900x700 two eras still touch the scrubber by 7-10px (the scrubber wraps to two lines there).
+- Dial, phone: the right-hand medallion's art touches the screen edge (box 6px past it; the art itself is inside). Left alone to keep
+  the ring at 92vw as in frame 4.
+- Did You Know card on a short window can show a long fact cut at the bottom until you scroll it (by design of the fix above).
+- Depth gauge node names are clipped at the gauge edge ("END OF WESTERN...") by the existing design; the gauge is decorative.
+- The header search field has no results popup (no JS at all), so there was nothing to test; the Design Bible's "results jump to the
+  Descent" is not built.
+- The Descent panel measured 4-12px off the right edge (and 21px below on the phone) only in its first 2.5s after a deep-link load: that
+  is the 320ms slide-in running late while the page loads, not a layout defect.
+- Not tested: real touch (swipe on the gallery, pinch), `prefers-reduced-motion`, Safari/Firefox, widths above 2550, Dial era
+  changes by wheel, drag, rail or scrubber-arrow clicks (eras were reached through the URL hash; medallions were clicked).

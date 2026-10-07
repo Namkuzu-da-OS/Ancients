@@ -29,6 +29,13 @@ body.page--dial {
      same pixels on short viewports -- sized off height, not guessed fixed pixels. */
   --top-band: clamp(118px, 13vh, 150px);
   --bottom-band: clamp(150px, 23vh, 215px);
+  /* The ring's diameter. QA fix: on short windows (1280x800, 1440x900, 1672x941) the ring's bottom medallions and
+     their captions ran under the era scrubber, hiding their titles. The last term keeps ring + medallion
+     captions (about 44px below the ring) clear of the scrubber (about 75px from the bottom). */
+  --ring-d: min(74vh, 58vw, 760px, calc(94vh - 245px));
+  /* Width and edge offset of the bottom-corner panels (Did You Know, Artifacts): the scrubber is fitted between them. */
+  --side-w: clamp(260px, 21vw, 350px);
+  --side-x: clamp(18px, 2.4vw, 44px);
 }
 
 .dial-stage:active {
@@ -153,7 +160,7 @@ body.page--dial {
   top: 53%;
   left: 50%;
   z-index: 2;
-  width: min(74vh, 58vw, 760px);
+  width: var(--ring-d);
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
   touch-action: none;
@@ -472,17 +479,13 @@ body.page--dial {
 .dial-fact {
   position: absolute;
   bottom: clamp(20px, 3.4vh, 40px);
-  left: clamp(18px, 2.4vw, 44px);
+  left: var(--side-x);
   z-index: 6;
-  width: clamp(260px, 21vw, 350px);
+  display: flex;
+  width: var(--side-w);
   max-height: calc(var(--bottom-band) - 14px);
+  flex-direction: column;
   padding: 0.85rem 1.1rem 1rem;
-  overflow-y: auto;
-  scrollbar-width: none;
-}
-
-.dial-fact::-webkit-scrollbar {
-  display: none;
 }
 
 .dial-fact__title {
@@ -494,12 +497,20 @@ body.page--dial {
 }
 
 .dial-fact__body {
+  min-height: 0;
   margin: 0 0 0.65rem;
+  /* QA fix: the whole card used to scroll (scrollbar hidden), so a long fact on a short window pushed the
+     "Another fact" button out of sight. Now only the fact scrolls; the title and the button always stay in view. */
+  overflow-y: auto;
+  scrollbar-color: var(--gold) transparent;
+  scrollbar-width: thin;
   font-size: 0.86rem;
   line-height: 1.45;
 }
 
 .dial-fact__refresh {
+  flex: 0 0 auto;
+  align-self: flex-start;
   min-height: 0;
   padding: 0.35rem 0.85rem;
   font-size: 0.64rem;
@@ -509,10 +520,10 @@ body.page--dial {
 
 .dial-teaser {
   position: absolute;
-  right: clamp(20px, 2.4vw, 46px);
+  right: var(--side-x);
   bottom: clamp(20px, 3.4vh, 40px);
   z-index: 6;
-  width: clamp(260px, 21vw, 350px);
+  width: var(--side-w);
   max-height: calc(var(--bottom-band) - 14px);
   padding: 0.75rem 1rem;
   overflow: hidden;
@@ -573,6 +584,9 @@ body.page--dial {
   align-items: center;
   gap: clamp(0.8rem, 2vw, 1.6rem);
   padding: 0.5rem clamp(1rem, 2.4vw, 1.8rem);
+  /* QA fix: a long era name ("Iron Age & Classical Period (1,200 BCE - 500 CE)") made the scrubber wider than the
+     gap between the two bottom panels, so it sat on top of both at 1070px. Fit it between them; the label wraps. */
+  max-width: calc(100vw - 2 * (var(--side-w) + var(--side-x) + 12px));
   transform: translateX(-50%);
 }
 
@@ -605,7 +619,7 @@ body.page--dial {
 }
 
 .dial-scrubber__label-wrap {
-  min-width: clamp(220px, 24vw, 340px);
+  min-width: min(clamp(220px, 24vw, 340px), calc(100vw - 2 * (var(--side-w) + var(--side-x) + 12px) - 150px));
   text-align: center;
 }
 
@@ -717,7 +731,43 @@ body.page--dial {
   }
 }
 
+/* QA fix: on a tall, narrow window the ring sits below the right-hand event panel, but a long event made the panel
+   grow down over the ring's top-right bezel (up to 23px at 1070x1741). Stop it at the ring's top edge plus 12% of its diameter
+   (the circle curves away under the panel's corner); the panel's own scroll takes the rest. */
+@media (min-width: 761px) and (max-width: 1180px) and (max-aspect-ratio: 1/1) {
+  .dial-event {
+    max-height: calc(53vh - 0.38 * var(--ring-d) - var(--top-band));
+  }
+}
+
+/* QA fix: on a landscape window narrower than 1180px the ring (58vw wide, dead centre) ran under the right-hand
+   event panel, hiding the right-hand medallions (1024x768: five of the eight eras). Fit the ring into the gap between
+   the era rail and the event panel instead: centre it there and cap its diameter by that gap, less ~54px each side for
+   the medallions that overhang the ring. The panel and rail widths below mirror their own rules. */
+@media (min-width: 761px) and (max-width: 1180px) and (min-aspect-ratio: 1/1) {
+  .dial-stage {
+    --rail-r: calc(clamp(18px, 2.6vw, 44px) + clamp(140px, 12.5vw, 205px));
+    --panel-l: calc(100vw - clamp(250px, 26vw, 320px) - clamp(20px, 2.4vw, 46px));
+    --ring-d: min(74vh, calc(var(--panel-l) - var(--rail-r) - 108px), calc(94vh - 245px));
+  }
+
+  .dial-ring-wrap {
+    left: calc((var(--rail-r) + var(--panel-l)) / 2);
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1000px) and (min-aspect-ratio: 1/1) {
+  .dial-stage {
+    --rail-r: calc(clamp(18px, 2.6vw, 44px) + 118px);
+    --panel-l: calc(100vw - 230px - clamp(20px, 2.4vw, 46px));
+  }
+}
+
 @media (max-width: 1000px) {
+  .dial-stage {
+    --side-w: 230px;
+  }
+
   .dial-rail {
     width: 118px;
   }

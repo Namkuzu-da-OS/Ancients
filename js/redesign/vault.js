@@ -239,7 +239,8 @@ function wire() {
   document.addEventListener("keydown", (e) => {
     if (e.target.closest?.("input, textarea")) return;
     if (e.key === "ArrowLeft" || e.key === "ArrowRight") { if (!current) return; e.preventDefault(); showImage(imageIndex + (e.key === "ArrowRight" ? 1 : -1)); }
-    if (e.key === "Escape") { if (stage.classList.contains("is-folio")) setFolio(false); else if (stage.classList.contains("is-sheet-open")) closePanel(); }
+    // QA fix: Escape also closes the desktop side panel (it only closed the folio and the sheet), like its close button.
+    if (e.key === "Escape") { if (stage.classList.contains("is-folio")) setFolio(false); else if (stage.classList.contains("is-sheet-open") || (!sheetQuery.matches && !stage.classList.contains("is-panel-closed"))) closePanel(); }
   });
   let x0 = null; const g = panel.querySelector(".vault-gallery__stage");
   g.addEventListener("pointerdown", (e) => { x0 = e.clientX; });

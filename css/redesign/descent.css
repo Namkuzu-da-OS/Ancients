@@ -38,6 +38,11 @@ html.lenis body {
   position: relative;
   display: block;
   min-height: 100vh;
+  /* QA fix: the blurred label pads (.marker__label::before) and the glow of the threads poke 15px past the right
+     edge on a phone. body is overflow-x:hidden, but a real phone browser still widens its layout viewport to fit
+     the overflow (innerWidth 405 on a 390 screen), so the page scrolled sideways and every fixed panel was laid out
+     15-49px too wide, its close button off screen. clip (not hidden) keeps position:sticky on the strata working. */
+  overflow-x: clip;
 }
 
 .descent__column {
@@ -1161,7 +1166,14 @@ html:not(.descent-ready) .depth-gauge {
   }
 
   .marker__label {
-    max-width: calc(100vw - var(--gauge-w) - 110px);
+    /* QA fix: the theoretical marker sits further right (its blue thread branches off the gold one), so its label
+       ran past the screen edge (to x=413 on a 390px phone) and, on a real phone, made the whole page scroll
+       sideways. Cap every label by where its own marker sits (--x is set on the slot): slot x, half a medal,
+       the gap and a 12px edge margin. */
+    max-width: min(
+      calc(100vw - var(--gauge-w) - 110px),
+      calc(100vw - var(--x) - var(--medal) / 2 - 10px - 12px)
+    );
     padding: 4px 2px;
   }
 
