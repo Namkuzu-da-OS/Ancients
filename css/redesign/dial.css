@@ -162,7 +162,7 @@ body.page--dial {
 .dial-ring {
   position: absolute;
   inset: 0;
-  transform: scaleY(0.8);
+  /* a true circle, face-on (Daryll 2026-10-06: the squashed 0.8 tilt read as an oval) */
   transform-origin: center;
 }
 

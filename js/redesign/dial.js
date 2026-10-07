@@ -201,7 +201,7 @@ function renderOrbit(era, state) {
   const startDeg = 196;
   const endDeg = -2;
   const R = 460; // orbit radius in a 0-1000 box, matching the ring band
-  const TILT = 0.64; // vertical compression to echo the ring's own tilt
+  const TILT = 1; // the ring is a true circle now, so the orbit is too
   const points = era.orbit.map((item, i) => {
     const t = n === 1 ? 0.5 : i / (n - 1);
     const deg = startDeg + (endDeg - startDeg) * t;
