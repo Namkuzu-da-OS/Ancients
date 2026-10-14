@@ -13,7 +13,7 @@ and a short entry in `docs/redesign/NOTES.md`. Nothing is pushed or published by
 | 05 | Art: 63 event images, one era at a time | ⬜ |
 | 06 | The Dial: layers, rotation, orbit, side panel, scrubber, Enter-this-era transition | ⬜ |
 | 07 | The Artifact Vault | ⬜ |
-| 08 | Search across events and artifacts | ⬜ |
+| 08 | Search across events and artifacts | ✅ |
 | 09 | Mobile pass (frame 4) | ⬜ |
 | 10 | Polish: reduced motion, focus, performance, side-by-side review against all frames | ⬜ |
 

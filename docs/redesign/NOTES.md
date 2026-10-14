@@ -461,3 +461,35 @@ close at the five sizes plus 1366x768, 1024x768, 820x1180, all four filters. Con
   is the 320ms slide-in running late while the page loads, not a layout defect.
 - Not tested: real touch (swipe on the gallery, pinch), `prefers-reduced-motion`, Safari/Firefox, widths above 2550, Dial era
   changes by wheel, drag, rail or scrubber-arrow clicks (eras were reached through the URL hash; medallions were clicked).
+
+## 08 Search (Sonnet)
+
+The header field ("Search people, places, events...") now works on all three pages.
+
+- **New `js/redesign/search.js`**, loaded by index.html, timeline.html and artifacts.html after data.js. It builds one index from the
+  shared loader (63 events: title, year, subtitle, description and every `details` field incl. locations, key figures, artifacts,
+  details, cultural context; 5 artifacts: title, era, category, overview, context, significance, mysteries). Every token must match,
+  digits tolerate thousands commas ("3000" finds "3,000 BCE"), accents are folded; title/year weigh most, prose least; max 12 hits.
+- **Results panel** is appended to the header (`.search-results.ornament-frame`, styles at the end of `base.css`): dark glass, gold
+  hairline and corner diamonds, Cinzel titles, a thumbnail per hit (the event painting, falling back to a crop of its era plate; the
+  Vault render for artifacts), year + subtitle, a snippet when the match is in the prose or a place, and the era. Matches are
+  underlined in gold. Theoretical events and Mysterious artifacts turn blue (row, tag, thumb border, active bar).
+- **Keyboard:** `/` focuses the field (not while typing elsewhere); Up/Down move, Enter opens, Escape closes (a second Escape clears
+  and blurs); the field swallows its keys so the Descent arrow stepping and Escape-closes-panel do not fire while typing. Click
+  outside closes. Mouse hover moves the highlight.
+- **Jumps:** event -> `timeline.html#<eraId>-NN` (opens the event panel); on the Descent it sets the hash in place, no reload
+  (re-picking the open event clears the hash first so hashchange fires again). Artifact -> `artifacts.html#<artifactId>`, a new deep
+  link handled in `vault.js` (on load and on hashchange; opens the panel/sheet, resets the filter to All).
+- **Layout:** panel aligns to the field (right edge of the header shell) at 480px wide; at 760px and under it spans the field's width
+  under the header. The header is lifted to z-index 200 only while results are showing, otherwise the Descent event panel (z 50) and
+  depth gauge covered it.
+- **Tested on Atlas (atlas-run, Chromium):** at 2550x1220, 1672x941, 1280x800, 1070x1741, 390x844 on all three pages: `/` focuses,
+  typing shows results fully on screen, no console errors. At 1280x800: Enter on a result opens the Descent event in place
+  (`#prehistoric-01`), Escape closes results and leaves the event panel open, outside click closes, empty state, theoretical result,
+  Dial click-through to `artifacts.html#paleolithic-hand-axe`, in-place Vault jump (Venus Figurines), phone tap on a result.
+  Screenshots: `docs/redesign/review/search-*.png`.
+- **Content:** no data file touched. `node tools/verify-content.mjs` with the default ref `main` now fails, because `main` holds the
+  redesign and the script re-extracts the original site from it; it passes against the original site:
+  `CONTENT_REF=b7dcdcc node tools/verify-content.mjs` (also OK at bba90cd).
+- **Not tested:** real touch keyboards, Safari/Firefox, screen readers (combobox/listbox ARIA is in place but unheard), IME input,
+  widths above 2550. Not done: no fuzzy or typo matching (substring tokens only).
