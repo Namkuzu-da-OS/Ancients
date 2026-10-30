@@ -260,8 +260,20 @@ function renderOrbit(era, state) {
 
 // Data titles are upper-case ("EMERGENCE OF HUMANS"); the frame sets them in title case.
 // This only changes letter case, never the words themselves.
+const SMALL_WORDS = new Set(["a", "an", "and", "at", "by", "for", "in", "of", "on", "or", "the", "to"]);
 function titleCase(str) {
-  return str.replace(/\w\S*/g, (w) => w.charAt(0) + w.slice(1).toLowerCase());
+  return str
+    .split(/(\s+)/)
+    .map((word, i) => {
+      if (/^\s+$/.test(word) || /\d/.test(word)) return word; // keep COVID-19 as written
+      if (i > 0 && SMALL_WORDS.has(word.toLowerCase())) return word.toLowerCase();
+      // Each hyphenated part gets its capital: Russia-Ukraine, not Russia-ukraine.
+      return word
+        .split("-")
+        .map((part) => part.replace(/^([^\p{L}\p{N}]*)(.)(.*)$/u, (m, lead, first, rest) => lead + first + rest.toLowerCase()))
+        .join("-");
+    })
+    .join("");
 }
 
 function renderWindow(era) {
@@ -464,17 +476,21 @@ function wireInteractions(state) {
   let dragging = false;
   let dragStartX = 0;
   let dragAccum = 0;
+  let dragMoved = 0;
+  // No pointer capture: it retargeted the mouse click away from the event bubbles, so
+  // clicking one did nothing. The window listeners below already follow the drag.
   const onDown = (e) => {
     dragging = true;
     dragStartX = e.clientX ?? e.touches?.[0]?.clientX ?? 0;
     dragAccum = 0;
-    ringWrap.setPointerCapture?.(e.pointerId);
+    dragMoved = 0;
   };
   const onMove = (e) => {
     if (!dragging) return;
     const x = e.clientX ?? e.touches?.[0]?.clientX ?? dragStartX;
     const delta = x - dragStartX;
     dragAccum += delta;
+    dragMoved += Math.abs(delta);
     dragStartX = x;
     const threshold = 90;
     if (Math.abs(dragAccum) >= threshold) {
@@ -485,6 +501,15 @@ function wireInteractions(state) {
   const onUp = () => {
     dragging = false;
   };
+  // A drag that turned the dial shouldn't also count as a click on the bubble it ended on.
+  ringWrap.addEventListener(
+    "click",
+    (e) => {
+      if (dragMoved > 8) e.stopPropagation();
+      dragMoved = 0;
+    },
+    true,
+  );
   ringWrap.addEventListener("pointerdown", onDown);
   window.addEventListener("pointermove", onMove);
   window.addEventListener("pointerup", onUp);

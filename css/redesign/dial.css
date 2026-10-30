@@ -180,6 +180,9 @@ body.page--dial {
   height: 100%;
   filter: drop-shadow(0 0 32px rgb(230 166 86 / 18%));
   will-change: transform;
+  /* the browser's own image drag cancelled a mouse drag of the ring */
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 .dial-window {
@@ -806,10 +809,30 @@ body.page--dial {
   }
 
   .dial-rail,
-  .dial-fact,
-  .dial-teaser,
   .dial-scrubber {
     display: none;
+  }
+
+  /* Did you know and the Artifacts card stack under the era strip. */
+  .dial-fact,
+  .dial-teaser {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    order: 1;
+    width: min(92vw, 520px);
+    max-height: none;
+    margin: 14px auto 0;
+  }
+
+  .dial-fact[hidden] {
+    display: none;
+  }
+
+  .dial-fact__body {
+    overflow: visible;
   }
 
   .dial-ring-wrap {
@@ -817,7 +840,8 @@ body.page--dial {
     top: auto;
     left: auto;
     width: min(92vw, 520px);
-    margin: 14px auto 8px;
+    /* room for the bottom bubbles' captions, which hang below the ring */
+    margin: 14px auto 36px;
     transform: none;
   }
 

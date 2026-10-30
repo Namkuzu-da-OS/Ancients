@@ -1244,6 +1244,8 @@ html:not(.descent-ready) .depth-gauge {
 
   .event-panel__frame {
     padding: 14px 12px 10px;
+    /* solid on phone: the sheet covers the markers, which ghosted through the text */
+    --panel-surface: rgb(10 8 6);
   }
 
   .event-panel__scroll {
