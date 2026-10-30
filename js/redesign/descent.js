@@ -107,11 +107,13 @@ function probe(src) {
 function artFor(item, variant) {
   const art = el("span", `event-art event-art--${variant}`);
   const spread = (item.dataIndex * 37 + item.era.eraIndex * 11) % 100;
-  // Absolute URL: a relative url() in a custom property resolves against the stylesheet, not the page.
-  art.style.setProperty("--plate", `url("${new URL(item.era.plate, document.baseURI).href}")`);
   art.style.setProperty("--crop-x", `${spread}%`);
-  const attach = () =>
-    probe(item.image).then((ok) => {
+  const attach = () => {
+    // The plate is set here, not up front: as a CSS background it would download every
+    // era's plate for every off-screen medal the moment the page renders.
+    // Absolute URL: a relative url() in a custom property resolves against the stylesheet, not the page.
+    art.style.setProperty("--plate", `url("${new URL(item.era.plate, document.baseURI).href}")`);
+    return probe(item.image).then((ok) => {
       if (!ok || art.querySelector("img")) return;
       const img = el("img");
       img.alt = "";
@@ -121,6 +123,7 @@ function artFor(item, variant) {
       img.addEventListener("error", () => img.remove(), { once: true });
       art.append(img);
     });
+  };
   art._attach = attach;
   return art;
 }
@@ -142,8 +145,10 @@ function renderEra(era, didYouKnow, state) {
   const farImg = el("img");
   farImg.alt = "";
   farImg.decoding = "async";
-  farImg.src = era.plate;
-  if (era.eraIndex > 1) farImg.loading = "lazy";
+  // Only the top era's plate loads up front; the rest wait for init()'s observer, since
+  // native lazy loading fires for every section while they all still sit at height 0.
+  if (era.eraIndex > 0) farImg.dataset.src = era.plate;
+  else farImg.src = era.plate;
   far.append(farImg);
   const haze = el("div", "stratum__haze");
   const near = el("div", "stratum__near");
@@ -340,7 +345,9 @@ function computeLayout(model, strataRoot) {
 function curveThrough(points, wiggle) {
   // Smooth vertical S-curves through each point, with a sideways drift between points
   // so the thread meanders like a molten river instead of a straight polyline.
+  // Also returns the cubic segments, so lengths can be measured without the SVG API.
   let d = `M${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)}`;
+  const segs = [];
   for (let i = 1; i < points.length; i += 1) {
     const a = points[i - 1];
     const b = points[i];
@@ -350,8 +357,49 @@ function curveThrough(points, wiggle) {
     const my = (a.y + b.y) / 2;
     d += ` C${a.x.toFixed(1)} ${(a.y + dy * 0.28).toFixed(1)} ${mx.toFixed(1)} ${(my - dy * 0.2).toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)}`;
     d += ` S${b.x.toFixed(1)} ${(b.y - dy * 0.28).toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`;
+    const m = { x: mx, y: my };
+    segs.push([a, { x: a.x, y: a.y + dy * 0.28 }, { x: mx, y: my - dy * 0.2 }, m]);
+    segs.push([m, { x: mx, y: my + dy * 0.2 }, { x: b.x, y: b.y - dy * 0.28 }, b]);
   }
-  return d;
+  return { d, segs };
+}
+
+// Polyline samples of the curve with cumulative length. getPointAtLength walks the whole
+// path on every call, so on a 20,000px thread a lookup table built with it froze the page
+// for seconds; sampling the beziers directly takes about a millisecond.
+function sampleCurve(segs, perSeg = 24) {
+  const xs = [];
+  const ys = [];
+  const lens = [];
+  let total = 0;
+  segs.forEach(([p0, p1, p2, p3], i) => {
+    for (let k = i === 0 ? 0 : 1; k <= perSeg; k += 1) {
+      const t = k / perSeg;
+      const u = 1 - t;
+      const x = u * u * u * p0.x + 3 * u * u * t * p1.x + 3 * u * t * t * p2.x + t * t * t * p3.x;
+      const y = u * u * u * p0.y + 3 * u * u * t * p1.y + 3 * u * t * t * p2.y + t * t * t * p3.y;
+      if (xs.length) total += Math.hypot(x - xs[xs.length - 1], y - ys[ys.length - 1]);
+      xs.push(x);
+      ys.push(y);
+      lens.push(total);
+    }
+  });
+  return { xs, ys, lens, total };
+}
+
+function pointAtLength(sample, s) {
+  const { xs, ys, lens } = sample;
+  let lo = 0;
+  let hi = lens.length - 1;
+  if (s <= 0) return { x: xs[0], y: ys[0] };
+  if (s >= lens[hi]) return { x: xs[hi], y: ys[hi] };
+  while (hi - lo > 1) {
+    const mid = (lo + hi) >> 1;
+    if (lens[mid] < s) lo = mid;
+    else hi = mid;
+  }
+  const t = (s - lens[lo]) / Math.max(1e-6, lens[hi] - lens[lo]);
+  return { x: xs[lo] + (xs[hi] - xs[lo]) * t, y: ys[lo] + (ys[hi] - ys[lo]) * t };
 }
 
 function buildThreads(model, layout, svg) {
@@ -368,10 +416,10 @@ function buildThreads(model, layout, svg) {
     ...gold.map((item) => ({ x: item.x, y: item.y })),
     { x: gold[gold.length - 1].x - 30, y: total },
   ];
-  const goldD = curveThrough(goldPoints, wiggle);
+  const goldCurve = curveThrough(goldPoints, wiggle);
 
   const theo = model.events.find((item) => item.theoretical);
-  let blueD = "";
+  let blueCurve = { d: "", segs: [] };
   if (theo) {
     const above = model.events[theo.order - 1];
     const below = model.events[theo.order + 1];
@@ -379,20 +427,23 @@ function buildThreads(model, layout, svg) {
     if (above) pts.push({ x: above.x, y: above.y });
     pts.push({ x: theo.x, y: theo.y, drift: 1 });
     if (below) pts.push({ x: below.x, y: below.y, drift: 1 });
-    blueD = curveThrough(pts, wiggle * 0.6);
+    blueCurve = curveThrough(pts, wiggle * 0.6);
   }
 
   const threads = [];
-  for (const [selector, d] of [
-    [".thread--gold", goldD],
-    [".thread--blue", blueD],
+  for (const [selector, { d, segs }] of [
+    [".thread--gold", goldCurve],
+    [".thread--blue", blueCurve],
   ]) {
     const group = svg.querySelector(selector);
     const paths = [...group.querySelectorAll("path")];
     paths.forEach((p) => p.setAttribute("d", d));
     if (!d) continue;
-    const ref = paths[0];
-    const length = ref.getTotalLength();
+    const length = paths[0].getTotalLength();
+    // Samples are scaled to the browser's own length so the dash offsets still line up.
+    const sample = sampleCurve(segs);
+    const scale = sample.total / Math.max(1e-6, length);
+    const ref = { getPointAtLength: (s) => pointAtLength(sample, s * scale) };
     // Length lookup by depth: the thread is drawn down to the reading line.
     const lut = [];
     const stepLen = 10;
@@ -723,6 +774,25 @@ async function main() {
   );
   model.events.forEach((item) => io.observe(item.button));
 
+  // Lazy plates: an era's painting loads when its section comes within a screen of view.
+  const plateIO = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.querySelectorAll(".stratum__stage img[data-src]").forEach((img) => {
+          img.src = img.dataset.src;
+          img.removeAttribute("data-src");
+        });
+        plateIO.unobserve(entry.target);
+      });
+    },
+    { rootMargin: "100% 0px" },
+  );
+  model.eras.forEach((era) => {
+    const section = document.getElementById(era.id);
+    if (section) plateIO.observe(section);
+  });
+
   /* ---- motion libraries (optional: the page works without them) ---- */
   const { gsap, ScrollTrigger, Lenis } = window;
   const motionOK = () => !REDUCED.matches;
@@ -811,7 +881,10 @@ async function main() {
         // first callback lands). Re-asserting the attach here, gated by the already-lit
         // state so it costs nothing once an image has loaded, guarantees every lit marker's
         // real art (if it exists) gets requested, independent of whether IO caught it.
-        if (lit) item.medalArt?._attach?.();
+        // Only near the view, though: a deep link lights every marker above the target era at
+        // once, and attaching all of them downloaded every event image and plate on the way.
+        // Markers skipped that way still load through the IntersectionObserver on the way back up.
+        if (lit && item.y > scrollY - top - 1200) item.medalArt?._attach?.();
       }
     });
 
