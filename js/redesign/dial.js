@@ -628,6 +628,11 @@ async function init() {
 
   const startIndex = parseHashEra(eras);
   goToEra(startIndex, state, { silent: true });
+  // A link to another era while already on the dial (e.g. index.html#classical) changes only the hash.
+  window.addEventListener("hashchange", () => {
+    const idx = parseHashEra(eras);
+    if (location.hash && idx !== state.eraIndex) goToEra(idx, state);
+  });
   document.documentElement.dataset.dialReady = "true";
   console.info(`[Dial] ready: ${eras.length} eras.`);
 }

@@ -839,6 +839,9 @@ body.page--dial {
     position: relative;
     top: auto;
     left: auto;
+    /* the ring fills most of a phone screen: a vertical swipe on it scrolls the page,
+       a sideways swipe still turns the dial */
+    touch-action: pan-y;
     width: min(92vw, 520px);
     /* room for the bottom bubbles' captions, which hang below the ring */
     margin: 14px auto 36px;
