@@ -64,6 +64,7 @@ function buildModel(timeline) {
       id: period.id,
       title: period.title,
       didYouKnow: period.didYouKnow,
+      theoryFacts: period.theoryFacts,
       eraIndex,
       plate: `${STRATA_DIR}${period.id}.webp`,
       focusX: PLATE_FOCUS[period.id] ?? 0.5,
@@ -316,18 +317,29 @@ function enterEra(e, eraId) {
 
 function renderFact(era, dyk, state) {
   const fact = $(".dial-fact");
-  const facts = era.didYouKnow ? dyk[era.didYouKnow] : null;
-  if (!facts || facts.length === 0) {
+  // An era can draw on several fact sets; sets listed in theoryFacts are alternative theories and show in blue.
+  const keys = (k) => [].concat(k ?? []);
+  const pool = [
+    ...keys(era.didYouKnow).flatMap((k) => (dyk[k] ?? []).map((text) => ({ text, theory: false }))),
+    ...keys(era.theoryFacts).flatMap((k) => (dyk[k] ?? []).map((text) => ({ text, theory: true }))),
+  ];
+  if (pool.length === 0) {
     fact.hidden = true;
     return;
   }
   fact.hidden = false;
   fact.innerHTML = "";
-  let pool = facts;
   let current = pool[Math.floor(Math.random() * pool.length)];
-  const body = el("p", "dial-fact__body", current);
+  const title = el("h3", "dial-fact__title", "");
+  const body = el("p", "dial-fact__body", "");
+  const show = () => {
+    title.textContent = current.theory ? "DID YOU KNOW? · THEORY" : "DID YOU KNOW?";
+    body.textContent = current.text;
+    fact.classList.toggle("is-theoretical", current.theory);
+  };
+  show();
   fact.append(
-    el("h3", "dial-fact__title", "DID YOU KNOW?"),
+    title,
     body,
     (() => {
       const btn = el("button", "dial-fact__refresh ornament-pill", "ANOTHER FACT ↻");
@@ -338,7 +350,7 @@ function renderFact(era, dyk, state) {
           next = pool[Math.floor(Math.random() * pool.length)];
         }
         current = next;
-        body.textContent = current;
+        show();
       });
       return btn;
     })(),

@@ -508,6 +508,10 @@ body.page--dial {
   line-height: 1.45;
 }
 
+.dial-fact.is-theoretical .dial-fact__title {
+  color: var(--blue-hot);
+}
+
 .dial-fact__refresh {
   flex: 0 0 auto;
   align-self: flex-start;

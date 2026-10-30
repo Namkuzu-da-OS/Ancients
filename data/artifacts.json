@@ -1,15 +1,15 @@
 {
   "mysterious-handbags": {
     "title": "Mysterious Handbag Symbols",
-    "era": "Multiple Civilizations • 9600 BCE - 500 CE",
+    "era": "Multiple Civilizations • 9600 BCE - 1500 CE",
     "images": [
       "images/Artifacts/Mysterious/handbags.jpg",
       "images/Artifacts/Mysterious/manybags.jpg"
     ],
-    "overview": "One of the most intriguing mysteries in ancient art is the recurring appearance of handbag-like objects in the iconography of disparate civilizations separated by vast distances and over 10,000 years of time. From Göbekli Tepe to Mesoamerica, from Sumeria to ancient Egypt, the same distinctive shape appears in the hands of gods, priests, and mythical beings.",
-    "context": "The 'handbag' symbol appears prominently across cultures: Göbekli Tepe, Turkey (9600 BCE) - carved on Pillar 43; Sumerian relief carvings from Mesopotamia (c. 3000 BCE) - carried by Anunnaki figures; Olmec stone carvings at La Venta, Mexico (c. 900 BCE); Assyrian palace reliefs showing winged beings; Egyptian hieroglyphs and tomb paintings; Toltec and Aztec depictions from Mexico; and Maori wood carvings in New Zealand. The geographical and temporal spread defies simple cultural transmission.",
-    "significance": "In conventional archaeology, these objects are often interpreted as ritual buckets or containers used in religious ceremonies. The Sumerians called them 'banduddu' - buckets used to carry sacred water. However, the consistent depiction across cultures suggests: A shared symbolic meaning, possible evidence of ancient global contact or influence, representation of an important object or concept, or potential religious/spiritual significance that transcended cultural boundaries.",
-    "mysteries": "Why does this specific symbol appear in so many unconnected ancient cultures? The similarities are too specific to be coincidental - the handle, proportions, and context of use are remarkably consistent. Were these cultures in contact? Did they inherit this symbol from a common older source? What was so important about these objects that they appear in the most sacred contexts - in temples, tombs, and in the hands of deities? The mystery deepens when we consider that mainstream archaeology has no satisfactory explanation for this phenomenon.",
+    "overview": "Graham Hancock and others point to a recurring handbag-like object in the art of far-apart civilizations, separated by vast distances and over 10,000 years. From Göbekli Tepe to Mesoamerica, and from Mesopotamia to ancient Egypt, a similar shape appears, often in the hands of gods, priests, and mythical beings.",
+    "context": "Proponents such as Graham Hancock point to a handbag-like symbol across cultures: Göbekli Tepe, Turkey (9600 BCE) - carved on Pillar 43; Olmec stone carvings at La Venta, Mexico (c. 900 BCE); Assyrian palace reliefs from Mesopotamia (c. 880-700 BCE) - carried by winged beings that ancient-astronaut writers link to the Anunnaki; Egyptian hieroglyphs and tomb paintings; Toltec and Aztec depictions from Mexico; and Maori wood carvings in New Zealand. Proponents argue the geographical and temporal spread is hard to explain by simple cultural transmission.",
+    "significance": "In conventional archaeology, the Assyrian examples are often interpreted as ritual buckets or containers used in religious ceremonies. The Mesopotamians called them 'banduddu' - buckets used to carry sacred water. Those who see a link suggest: A shared symbolic meaning, possible evidence of ancient global contact or influence, representation of an important object or concept, or potential religious/spiritual significance that transcended cultural boundaries.",
+    "mysteries": "Why does this specific symbol appear in so many unconnected ancient cultures? Proponents say the similarities are too specific to be coincidental - the handle, proportions, and context of use are remarkably consistent. Were these cultures in contact? Did they inherit this symbol from a common older source? What was so important about these objects that they appear in the most sacred contexts - in temples, tombs, and in the hands of deities? Archaeologists explain each case on its own, a ritual bucket in Assyria, an incense pouch in Mexico, and call the likeness coincidence. Others think that is too neat.",
     "category": [
       "mysterious"
     ]
@@ -19,16 +19,16 @@
     "era": "Ancient Egypt • 3100-30 BCE",
     "image": "images/Artifacts/Mysterious/Cartouche-obelisk-Hatshepsut-Egypt-Luxor.webp",
     "overview": "Cartouches are oval-shaped hieroglyphic inscriptions that enclosed the names of Egyptian pharaohs and queens. These sacred symbols were believed to protect the royal name from evil spirits in life and death.",
-    "context": "The cartouche, known in ancient Egyptian as 'shenu', evolved from the earlier 'shen' ring symbol representing eternity and protection. First appearing in the Fourth Dynasty (c. 2613-2494 BCE), cartouches became the standard way to denote royal names. The example shown is from Queen Hatshepsut's mortuary temple at Luxor.",
+    "context": "The cartouche, known in ancient Egyptian as 'shenu', evolved from the earlier 'shen' ring symbol representing eternity and protection. The first examples date to the end of the Third Dynasty, and cartouches became the standard way to write royal names from the Fourth Dynasty (c. 2613-2494 BCE), beginning with Sneferu. The example shown is the cartouche of Hatshepsut, who ruled as pharaoh, carved on a red granite obelisk at Karnak Temple in Luxor.",
     "significance": "Cartouches served multiple purposes: They distinguished royal names from other text in inscriptions, provided magical protection for the pharaoh's name, helped modern Egyptologists identify and date monuments and artifacts, and were key to deciphering hieroglyphics via the Rosetta Stone.",
-    "mysteries": "Some cartouches contain cryptographic writings that scholars still debate. Why did some pharaohs have multiple cartouche names? What is the significance of cartouches found in unexpected locations far from Egypt? The practice of enclosing names in protective symbols appears in other cultures too - is there a connection?",
+    "mysteries": "Some hieroglyphic spellings, especially in late Ptolemaic temple texts, are deliberately cryptic and hard to read. Why did some pharaohs have multiple cartouche names? What is the significance of cartouches found in unexpected locations far from Egypt? The practice of enclosing names in protective symbols appears in other cultures too - is there a connection?",
     "category": [
       "art"
     ]
   },
   "bronze-age-swords": {
     "title": "Bronze Age Swords",
-    "era": "Bronze Age • 3000-1200 BCE",
+    "era": "Late Bronze Age • 1300-800 BCE",
     "image": "images/timeline/bronze_age/artifacts/Latenium-epees-bronze.webp",
     "overview": "These bronze swords from the Late Bronze Age represent a pinnacle of ancient metallurgical achievement. Found at various sites across Europe, they demonstrate sophisticated casting techniques and artistic design.",
     "context": "The Bronze Age saw a revolution in warfare with the development of bronze weapons. These swords, dating from approximately 1300-1000 BCE, were cast using advanced techniques including the lost-wax method. They were not merely functional weapons but also symbols of status and power, often buried with warriors or deposited in rivers as votive offerings.",
@@ -40,11 +40,11 @@
   },
   "paleolithic-hand-axe": {
     "title": "Paleolithic Hand Axe",
-    "era": "Lower Paleolithic • 1.76 million - 130,000 BCE",
+    "era": "Lower Paleolithic • 1.76 million - 130,000 years ago",
     "image": "images/Artifacts/Tools_Weapons/Early-human-hand-axe-008.jpg",
     "overview": "The Acheulean hand axe represents one of humanity's longest-used tool designs, remaining virtually unchanged for over 1.5 million years. These teardrop-shaped tools are found across Africa, Europe, and Asia.",
     "context": "Named after Saint-Acheul in France where they were first discovered, these bifacially worked tools were created by Homo erectus and later Homo heidelbergensis. The remarkable consistency in their design across vast distances and time periods suggests either cultural transmission or convergent evolution of an optimal design.",
-    "significance": "Hand axes represent several major cognitive leaps: The ability to conceive and execute a symmetrical design, planning and foresight in tool production, possible aesthetic sense (many are more refined than functionally necessary), and the first evidence of tool-making traditions passed down through generations. They were likely multipurpose tools used for butchering, woodworking, and digging.",
+    "significance": "Hand axes represent several major cognitive leaps: The ability to conceive and execute a symmetrical design, planning and foresight in tool production, possible aesthetic sense (many are more refined than functionally necessary), and one of the earliest standardized, bifacial tool traditions, passed down through generations for over a million years. They were likely multipurpose tools used for butchering, woodworking, and digging.",
     "mysteries": null,
     "category": [
       "tools"

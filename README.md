@@ -40,7 +40,13 @@ Comprehensive documentation is available in the `docs` folder, organized by cate
 
 See `docs/index.md` for a complete documentation guide.
 
+## Where it runs
+
+- **Live:** https://ancients.meatball-labs.com, served by GitHub Pages (branch `main`, `CNAME`).
+- **Content:** every word comes from `data/*.json`. Run `node tools/verify-content.mjs` before committing; it checks the data
+  against the original site and fails if any event's popup is empty or still holds placeholder text.
+
 ## Getting Started
 
-Simply open `index.html` in a modern web browser to explore the timeline.
+Serve the folder and open it: `python3 -m http.server 8000`, then http://localhost:8000/.
 
