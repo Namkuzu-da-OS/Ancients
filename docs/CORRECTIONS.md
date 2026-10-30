@@ -208,3 +208,23 @@ A reviewer opened a source for each claim (report: docs/honesty-check-2026-10-28
 - Theory facts were never shown on the redesigned site (their sets weren't tied to any era). They now show, in blue and
   labelled THEORY, in the era that matches their time frame: pre-cataclysm and cataclysm theories in the Prehistoric era,
   recovery theories in the Early Neolithic. Early Neolithic and Early Urban got their own fact sets back.
+
+### QA fact fixes (2026-10-29)
+
+From a QA pass over every event, fact and artifact. Only fixes with a source were made; nothing in the theory content changed.
+- Columbus fact: "never reached the mainland United States or Canada". His second voyage landed at St. Croix, now US Virgin
+  Islands, on 14 Nov 1493. https://www.nps.gov/places/columbus-landing-salt-river-point.htm
+- Publick Occurrences: "first multi-page newspaper in the British American colonies", not the first in North America.
+  https://en.wikipedia.org/wiki/Publick_Occurrences_Both_Forreign_and_Domestick
+- Lascaux: found in 1940 by Marcel Ravidat (18) and three friends, after his dog Robot led him to a hole left by an
+  uprooted tree; the dog "falling in" was Ravidat's later embellishment. https://en.wikipedia.org/wiki/Lascaux
+- Jericho event: "one of the world's oldest settlements" (was "continuously inhabited"; it has gaps, as the Jericho fact
+  already says). https://en.wikipedia.org/wiki/Jericho
+- Hand axe artifact: Saint-Acheul is the type site that gave the name; hand axes were first recognised as ancient at
+  Hoxne, England, in 1797 (John Frere). https://en.wikipedia.org/wiki/Acheulean
+- Bronze Age swords artifact: "1300-800 BCE", matching the artifact's own era line (Naue II from the 13th century BC; carp's
+  tongue swords 9th-8th century BC). https://en.wikipedia.org/wiki/Bronze_Age_sword
+- Two facts moved to the era they belong to: the 4th-century-CE toothpaste papyrus from Bronze Age to Classical, and the
+  Ming-era sticky-rice mortar from Classical to Post-Classical.
+- Checked and left alone: the Slovenia wheel "around 3200 BCE" sits inside its radiocarbon range (about 3400-3150 BCE).
+  Not changed for lack of a source: the swords' "lost-wax method".
