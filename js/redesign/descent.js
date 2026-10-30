@@ -884,7 +884,8 @@ async function main() {
         // Only near the view, though: a deep link lights every marker above the target era at
         // once, and attaching all of them downloaded every event image and plate on the way.
         // Markers skipped that way still load through the IntersectionObserver on the way back up.
-        if (lit && item.y > scrollY - top - 1200) item.medalArt?._attach?.();
+        // (With reduced motion every marker is lit at once, hence the bound below the view too.)
+        if (lit && item.y > scrollY - top - 1200 && item.y < scrollY - top + vh + 1200) item.medalArt?._attach?.();
       }
     });
 

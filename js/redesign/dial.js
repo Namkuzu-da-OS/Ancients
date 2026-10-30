@@ -442,10 +442,12 @@ function goToEra(eraIndex, state, { silent = false } = {}) {
 function wireInteractions(state) {
   const stage = $(".dial-stage");
   let wheelLock = false;
+  // On phone widths the page scrolls, so the wheel must too (to reach the cards below the dial).
+  const phone = window.matchMedia("(max-width: 760px)");
   stage.addEventListener(
     "wheel",
     (e) => {
-      if (Math.abs(e.deltaY) < 4) return;
+      if (phone.matches || Math.abs(e.deltaY) < 4) return;
       e.preventDefault();
       if (wheelLock) return;
       wheelLock = true;
@@ -500,12 +502,16 @@ function wireInteractions(state) {
   };
   const onUp = () => {
     dragging = false;
+    // The click that ends this gesture fires right after pointerup; clear the drag after it,
+    // so a drag released off the ring can't swallow some later click.
+    setTimeout(() => (dragMoved = 0), 0);
   };
   // A drag that turned the dial shouldn't also count as a click on the bubble it ended on.
   ringWrap.addEventListener(
     "click",
     (e) => {
-      if (dragMoved > 8) e.stopPropagation();
+      // detail 0 = a keyboard click, never the end of a drag.
+      if (e.detail !== 0 && dragMoved > 8) e.stopPropagation();
       dragMoved = 0;
     },
     true,
@@ -513,6 +519,7 @@ function wireInteractions(state) {
   ringWrap.addEventListener("pointerdown", onDown);
   window.addEventListener("pointermove", onMove);
   window.addEventListener("pointerup", onUp);
+  window.addEventListener("pointercancel", onUp);
 }
 
 /* ---------------------------------------------------------------- FX */
