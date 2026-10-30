@@ -6,6 +6,7 @@ import { loadAncientsData, yearsAgo } from "./data.js";
 const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)");
 const STRATA_DIR = "images/redesign/strata/";
 const EVENTS_DIR = "images/redesign/events/";
+const THUMBS_DIR = "images/redesign/events-thumb/"; // 400px copies for the small medals (tools/make-thumbs.sh)
 
 // Where the rock bands sit inside each plate (fractions of plate height). The near
 // parallax layer shows only these bands, so the painted scene recedes behind the rock.
@@ -70,6 +71,7 @@ function buildModel(timeline) {
         dataIndex,
         key: `${period.id}-${nn}`,
         image: `${EVENTS_DIR}${period.id}/${nn}-${slugify(event.title)}.webp`,
+        thumb: `${THUMBS_DIR}${period.id}/${nn}-${slugify(event.title)}.webp`,
         theoretical: event.theoretical === true,
         yearsAgo: yearsAgo(event.year),
         approx,
@@ -105,6 +107,7 @@ function probe(src) {
 // Every event image has a fallback: a crop of its own era's strata plate, framed so that
 // neighbouring events show different parts of the painting. Never a broken image.
 function artFor(item, variant) {
+  const src = variant === "panel" ? item.image : item.thumb;
   const art = el("span", `event-art event-art--${variant}`);
   const spread = (item.dataIndex * 37 + item.era.eraIndex * 11) % 100;
   art.style.setProperty("--crop-x", `${spread}%`);
@@ -113,12 +116,12 @@ function artFor(item, variant) {
     // era's plate for every off-screen medal the moment the page renders.
     // Absolute URL: a relative url() in a custom property resolves against the stylesheet, not the page.
     art.style.setProperty("--plate", `url("${new URL(item.era.plate, document.baseURI).href}")`);
-    return probe(item.image).then((ok) => {
+    return probe(src).then((ok) => {
       if (!ok || art.querySelector("img")) return;
       const img = el("img");
       img.alt = "";
       img.decoding = "async";
-      img.src = item.image;
+      img.src = src;
       img.addEventListener("load", () => art.classList.add("has-image"), { once: true });
       img.addEventListener("error", () => img.remove(), { once: true });
       art.append(img);

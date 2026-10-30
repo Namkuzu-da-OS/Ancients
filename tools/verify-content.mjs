@@ -34,6 +34,8 @@ t.periods.forEach((p) => p.events.forEach((e, i) => {
   if (prev && yearNum(prev.year) > yearNum(e.year)) fail(`${id}: ${e.year} comes after ${prev.year} (events must run in date order)`);
   const img = `images/redesign/events/${p.id}/${nn}-${slugify(e.title)}.webp`;
   if (!fs.existsSync(img)) fail(`${id}: event image ${img} missing`);
+  const thumb = img.replace('/events/', '/events-thumb/');
+  if (!fs.existsSync(thumb)) fail(`${id}: thumbnail ${thumb} missing (run tools/make-thumbs.sh)`);
 }));
 
 const dyk = read('data/did-you-know.json');

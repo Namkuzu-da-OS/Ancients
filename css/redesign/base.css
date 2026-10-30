@@ -1,6 +1,5 @@
-@import url("https://cdn.jsdelivr.net/npm/@fontsource/cinzel/400.css");
-@import url("https://cdn.jsdelivr.net/npm/@fontsource/cinzel/700.css");
-@import url("https://cdn.jsdelivr.net/npm/@fontsource/cormorant-garamond/500.css");
+/* Fonts are served from this site (css/fonts), not a CDN: nothing loads from a third party. */
+@import url("fonts.css");
 
 *,
 *::before,

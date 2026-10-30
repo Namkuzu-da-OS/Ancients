@@ -4,7 +4,7 @@
 // Nothing here has its own words: every string shown comes from data/*.json via the shared loader.
 import { loadAncientsData } from "./data.js";
 
-const EVENTS_DIR = "images/redesign/events/";
+const EVENTS_DIR = "images/redesign/events-thumb/"; // result thumbnails use the 400px copies
 const STRATA_DIR = "images/redesign/strata/";
 const VAULT_DIR = "images/redesign/vault/";
 const MAX_RESULTS = 12;

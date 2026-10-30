@@ -8,6 +8,7 @@ const MOBILE = window.matchMedia("(max-width: 760px)");
 
 const STRATA_DIR = "images/redesign/strata/";
 const EVENTS_DIR = "images/redesign/events/";
+const THUMBS_DIR = "images/redesign/events-thumb/"; // 400px copies for the small bubbles (tools/make-thumbs.sh)
 const DIAL_DIR = "images/redesign/dial/";
 
 // Where each era's plate should centre its circular window crop (fraction of plate width).
@@ -57,6 +58,7 @@ function buildModel(timeline) {
         dataIndex,
         key: `${period.id}-${nn}`,
         image: `${EVENTS_DIR}${period.id}/${nn}-${slugify(event.title)}.webp`,
+        thumb: `${THUMBS_DIR}${period.id}/${nn}-${slugify(event.title)}.webp`,
         theoretical: event.theoretical === true,
       };
     });
@@ -129,18 +131,19 @@ function probe(src) {
 
 // Every event image has a fallback: a crop of its own era's plate. Never a broken image,
 // never a console 404 for a file we haven't probed.
-function attachArt(node, item, era) {
+function attachArt(node, item, era, size = "full") {
+  const src = size === "thumb" ? item.thumb : item.image;
   const plateUrl = new URL(era.plate, document.baseURI).href;
   node.style.setProperty("--plate", `url("${plateUrl}")`);
   const spread = (item.dataIndex * 37 + era.eraIndex * 11) % 100;
   node.style.setProperty("--crop-x", `${spread}%`);
-  if (!item.image) return;
-  probe(item.image).then((ok) => {
+  if (!src) return;
+  probe(src).then((ok) => {
     if (!ok || node.querySelector("img")) return;
     const img = el("img");
     img.alt = "";
     img.decoding = "async";
-    img.src = item.image;
+    img.src = src;
     img.addEventListener("load", () => node.classList.add("has-image"), { once: true });
     img.addEventListener("error", () => img.remove(), { once: true });
     node.append(img);
@@ -176,6 +179,9 @@ function buildStrip(eras, state) {
     const { name, range } = splitEraTitle(era.title);
     const art = el("span", "dial-strip__art event-art");
     attachArt(art, { dataIndex: era.eraIndex, image: null }, era);
+    // The strip cards are 108px wide: use the small copy of the plate (tools/make-thumbs.sh).
+    const small = new URL(era.plate.replace("/strata/", "/strata-thumb/"), document.baseURI).href;
+    art.style.setProperty("--plate", `url("${small}")`);
     button.append(art, el("span", "dial-strip__name", name), el("span", "dial-strip__range", range));
     button.addEventListener("click", () => goToEra(era.eraIndex, state));
     strip.append(button);
@@ -246,7 +252,7 @@ function renderOrbit(era, state) {
     button.dataset.key = item.key;
     button.setAttribute("aria-pressed", state.focusKey === item.key ? "true" : "false");
     const art = el("span", "event-art event-art--medallion");
-    attachArt(art, item, era);
+    attachArt(art, item, era, "thumb");
     const caption = el("span", "dial-medallion__caption");
     caption.append(
       el("span", "dial-medallion__year", item.event.year),

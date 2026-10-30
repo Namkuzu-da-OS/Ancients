@@ -248,3 +248,5 @@ the subtitle, so no geography was lost. The theory event keeps its title ("North
 - Era ranges keep their round numbers; with the two moves every event now sits inside its era's printed range.
 - Event images were renamed to match (their file names follow era, position and title); deep links like #earlyNeolithic-03
   now point one event later in the two eras that gained an event.
+- Bronze Age swords artifact: the lost-wax method is now credited to the hollow hilts of solid-hilted swords, which a 2023
+  study finds were almost all wax-cast and riveted to the blade; blades were cast in moulds. https://isidore.science/document/10670/1.ww1lbd
