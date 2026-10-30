@@ -228,3 +228,23 @@ From a QA pass over every event, fact and artifact. Only fixes with a source wer
   Ming-era sticky-rice mortar from Classical to Post-Classical.
 - Checked and left alone: the Slovenia wheel "around 3200 BCE" sits inside its radiocarbon range (about 3400-3150 BCE).
   Not changed for lack of a source: the swords' "lost-wax method".
+
+### Clearer titles and two events moved to their era (2026-10-29, agreed with a Codex second opinion)
+
+Editorial, not error fixes: the dial shows only the title, and several events shared one. The region names moved into
+the subtitle, so no geography was lost. The theory event keeps its title ("North America [Theoretical]").
+- ~12,700 BCE Northern Hemisphere Climate -> BØLLING-ALLERØD WARMING. https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=noaa-icecore-9891
+- ~10,900 BCE Northern Hemisphere Climate -> YOUNGER DRYAS BEGINS. https://pmc.ncbi.nlm.nih.gov/articles/PMC7519346/
+- ~9,700 BCE Northern Hemisphere Climate -> YOUNGER DRYAS ENDS, moved from Prehistoric to Early Neolithic: it marks the
+  start of the Holocene (11,700 years before 2000 CE), inside the Early Neolithic's 10,000-5,000 BCE. https://quaternary.stratigraphy.org/major-divisions
+- ~15,000 BCE Europe -> MAGDALENIAN CULTURE (Western Europe). https://archeologie.culture.gouv.fr/sculpture-prehistoire/en/magdalenian-culture
+- 5,400 BCE Europe -> VINČA CULTURE (Southeast Europe).
+- ~10,800 BCE North America -> MEGAFAUNA & CLOVIS CHANGES (North America). https://pmc.ncbi.nlm.nih.gov/articles/PMC7577710/
+- 9,000 BCE Fertile Crescent -> EARLY FARMING VILLAGES ("first" would overstate a gradual change). https://www.cam.ac.uk/research/news/from-foraging-to-farming-the-10000-year-revolution
+- 8,000 BCE Near East -> CATTLE DOMESTICATION; Southwest Asia -> SHEEP & GOAT DOMESTICATION. https://doi.org/10.1146/annurev-animal-022516-022747
+- 8,000 BCE Anatolia -> GÖBEKLI TEPE BURIED (Southeastern Anatolia). https://www.dainst.blog/the-tepe-telegrams/the-research-project/
+- 2,900 BCE Urban Centers (Sumerian city-states) moved from Early Urban to Bronze Age: the Mesopotamian Early Dynastic
+  period runs c. 2900-2340 BCE. https://archeologie.culture.gouv.fr/en/glossary/early-dynastic-period
+- Era ranges keep their round numbers; with the two moves every event now sits inside its era's printed range.
+- Event images were renamed to match (their file names follow era, position and title); deep links like #earlyNeolithic-03
+  now point one event later in the two eras that gained an event.

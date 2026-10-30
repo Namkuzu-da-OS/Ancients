@@ -175,14 +175,14 @@
         },
         {
           "year": "~15,000 BCE",
-          "shortDesc": "Magdalenian Culture",
-          "title": "EUROPE",
+          "shortDesc": "Western Europe",
+          "title": "MAGDALENIAN CULTURE",
           "description": "Flourishing of the Magdalenian culture in Western Europe, known for sophisticated bone/antler tools and renowned cave art (e.g., Lascaux, Altamira).",
           "theoretical": false,
           "details": {
             "year": "~15,000 BCE",
-            "shortDesc": "Magdalenian Culture",
-            "title": "EUROPE",
+            "shortDesc": "Western Europe",
+            "title": "MAGDALENIAN CULTURE",
             "description": "Flourishing of the Magdalenian culture in Western Europe, known for sophisticated bone/antler tools and renowned cave art (e.g., Lascaux, Altamira).",
             "details": "The Magdalenian is dated to roughly 17,000 to 12,000 years ago (about 15,000 to 10,000 BCE) and spread from Iberia to Poland. Its people made harpoons, barbed points and spear-throwers from antler, and eyed bone needles for tailored clothing. Lascaux in France and Altamira in Spain hold famous cave paintings of bison, horses and deer, with Altamira's Magdalenian phase dated to about 16,000 years ago.",
             "keyFigures": [],
@@ -203,14 +203,14 @@
         },
         {
           "year": "~12,700 BCE",
-          "shortDesc": "Bølling-Allerød Warming",
-          "title": "NORTHERN HEMISPHERE CLIMATE",
+          "shortDesc": "Northern Hemisphere climate",
+          "title": "BØLLING-ALLERØD WARMING",
           "description": "A significant warming period begins after the Last Glacial Maximum, leading to ice sheet retreat and ecosystem changes.",
           "theoretical": false,
           "details": {
             "year": "~12,700 BCE",
-            "shortDesc": "Bølling-Allerød Warming",
-            "title": "Northern Hemisphere Climate",
+            "shortDesc": "Northern Hemisphere climate",
+            "title": "BØLLING-ALLERØD WARMING",
             "description": "A significant warming period begins after the Last Glacial Maximum, leading to ice sheet retreat and ecosystem changes.",
             "details": "The Bølling-Allerød interstadial lasted from about 14,700 to 12,900 years ago. Greenland ice cores show a warming of several degrees within decades, and meltwater pulse 1A raised sea level by many meters in a few centuries. Forests spread north, and glaciers retreated across Europe and North America.",
             "keyFigures": [],
@@ -232,14 +232,14 @@
         },
         {
           "year": "~10,900 BCE",
-          "shortDesc": "Younger Dryas Begins",
-          "title": "NORTHERN HEMISPHERE CLIMATE",
+          "shortDesc": "Northern Hemisphere climate",
+          "title": "YOUNGER DRYAS BEGINS",
           "description": "An abrupt return to near-glacial conditions interrupts the post-glacial warming trend, lasting over a millennium.",
           "theoretical": false,
           "details": {
             "year": "~10,900 BCE",
-            "shortDesc": "Younger Dryas Begins",
-            "title": "Northern Hemisphere Climate",
+            "shortDesc": "Northern Hemisphere climate",
+            "title": "YOUNGER DRYAS BEGINS",
             "description": "An abrupt return to near-glacial conditions interrupts the post-glacial warming trend, lasting over a millennium.",
             "details": "The Younger Dryas was a return to cold conditions from about 12,900 to 11,700 years ago, named after the Arctic flower Dryas octopetala found in European sediments. It is best documented around the North Atlantic. The leading explanation is that meltwater from North American ice sheets weakened the Atlantic circulation that carries warmth north.",
             "keyFigures": [],
@@ -294,14 +294,14 @@
         },
         {
           "year": "~10,800 BCE",
-          "shortDesc": "Megafauna/Clovis Changes",
-          "title": "NORTH AMERICA",
+          "shortDesc": "North America",
+          "title": "MEGAFAUNA & CLOVIS CHANGES",
           "description": "Accelerated extinction of large mammals (mammoths, mastodons) and significant transformation/decline of the Clovis Paleo-Indian culture coincides with Younger Dryas onset.",
           "theoretical": false,
           "details": {
             "year": "~10,800 BCE",
-            "shortDesc": "Megafauna/Clovis Changes",
-            "title": "NORTH AMERICA",
+            "shortDesc": "North America",
+            "title": "MEGAFAUNA & CLOVIS CHANGES",
             "description": "Accelerated extinction of large mammals (mammoths, mastodons) and significant transformation/decline of the Clovis Paleo-Indian culture coincides with Younger Dryas onset.",
             "details": "About 35 genera of large North American mammals, including mammoths, mastodons, giant ground sloths and camels, vanished roughly 13,000 to 11,000 years ago. The Clovis tradition, known for fluted spear points, lasted only a few centuries around 13,000 years ago before giving way to regional point types such as Folsom. Sites like Blackwater Draw and Murray Springs show Clovis hunters killing mammoth.",
             "keyFigures": [],
@@ -316,34 +316,6 @@
               "Megafauna fossils",
               "Mammoth kill sites",
               "Radiocarbon dates"
-            ],
-            "imageFolder": "prehistoric"
-          }
-        },
-        {
-          "year": "~9,700 BCE",
-          "shortDesc": "End of Younger Dryas",
-          "title": "NORTHERN HEMISPHERE CLIMATE",
-          "description": "Rapid warming resumes, marking the end of the last major cold period of the Pleistocene and the beginning of the Holocene epoch.",
-          "theoretical": false,
-          "details": {
-            "year": "~9,700 BCE",
-            "shortDesc": "End of Younger Dryas",
-            "title": "Northern Hemisphere Climate",
-            "description": "Rapid warming resumes, marking the end of the last major cold period of the Pleistocene and the beginning of the Holocene epoch.",
-            "details": "The Younger Dryas ended about 11,700 years ago, with Greenland ice cores showing warming of several degrees in a few decades. That date also marks the formal start of the Holocene epoch. Ice sheets kept shrinking and sea level rose, setting conditions for the spread of farming in the Near East.",
-            "keyFigures": [],
-            "culturalContext": "Warmer, wetter, more stable conditions favored plant cultivation and settled life. The first monumental sites and villages in the Near East followed soon after.",
-            "locations": [
-              "Greenland",
-              "North Atlantic",
-              "Near East"
-            ],
-            "artifacts": [
-              "Greenland ice core records",
-              "Pollen sequences",
-              "Lake sediments",
-              "Marine cores"
             ],
             "imageFolder": "prehistoric"
           }
@@ -362,6 +334,34 @@
         "recovery"
       ],
       "events": [
+        {
+          "year": "~9,700 BCE",
+          "shortDesc": "Northern Hemisphere climate",
+          "title": "YOUNGER DRYAS ENDS",
+          "description": "Rapid warming resumes, marking the end of the last major cold period of the Pleistocene and the beginning of the Holocene epoch.",
+          "theoretical": false,
+          "details": {
+            "year": "~9,700 BCE",
+            "shortDesc": "Northern Hemisphere climate",
+            "title": "YOUNGER DRYAS ENDS",
+            "description": "Rapid warming resumes, marking the end of the last major cold period of the Pleistocene and the beginning of the Holocene epoch.",
+            "details": "The Younger Dryas ended about 11,700 years ago, with Greenland ice cores showing warming of several degrees in a few decades. That date also marks the formal start of the Holocene epoch. Ice sheets kept shrinking and sea level rose, setting conditions for the spread of farming in the Near East.",
+            "keyFigures": [],
+            "culturalContext": "Warmer, wetter, more stable conditions favored plant cultivation and settled life. The first monumental sites and villages in the Near East followed soon after.",
+            "locations": [
+              "Greenland",
+              "North Atlantic",
+              "Near East"
+            ],
+            "artifacts": [
+              "Greenland ice core records",
+              "Pollen sequences",
+              "Lake sediments",
+              "Marine cores"
+            ],
+            "imageFolder": "prehistoric"
+          }
+        },
         {
           "year": "9,600 BCE",
           "shortDesc": "Often called the world's oldest temple",
@@ -418,14 +418,14 @@
         },
         {
           "year": "9,000 BCE",
-          "shortDesc": "Agricultural beginnings",
-          "title": "FERTILE CRESCENT",
+          "shortDesc": "Fertile Crescent",
+          "title": "EARLY FARMING VILLAGES",
           "description": "Early farming villages in the Middle East cultivate wild and early forms of grains like wheat and barley",
           "theoretical": false,
           "details": {
             "year": "9000 BCE",
-            "shortDesc": "Agricultural beginnings",
-            "title": "Fertile Crescent",
+            "shortDesc": "Fertile Crescent",
+            "title": "EARLY FARMING VILLAGES",
             "description": "Villages in the Fertile Crescent cultivated wild and early forms of grains like wheat and barley. Goats and sheep were domesticated there soon after, leading to the first settled agricultural communities.",
             "details": "Early farmers in the Fertile Crescent began cultivating wild grains like wheat and barley, and domesticating animals such as goats and sheep, leading to the first settled agricultural communities.",
             "keyFigures": [],
@@ -472,14 +472,14 @@
         },
         {
           "year": "8,000 BCE",
-          "shortDesc": "Domestication of Cattle",
-          "title": "NEAR EAST",
+          "shortDesc": "Near East",
+          "title": "CATTLE DOMESTICATION",
           "description": "Domestication of cattle, kept at first mainly for meat and hides, in the Near East region",
           "theoretical": false,
           "details": {
             "year": "8000 BCE",
-            "shortDesc": "Domestication of Cattle",
-            "title": "NEAR EAST",
+            "shortDesc": "Near East",
+            "title": "CATTLE DOMESTICATION",
             "description": "Domestication of cattle, kept at first mainly for meat and hides, in the Near East region",
             "details": "By 8000 BCE, there is clear evidence of morphological changes indicating cattle domestication. These animals provided reliable meat and hides. Milk use is attested from about 6500 BCE, and pulling and plowing came later.",
             "keyFigures": [],
@@ -498,14 +498,14 @@
         },
         {
           "year": "8,000 BCE",
-          "shortDesc": "Göbekli Tepe Buried",
-          "title": "ANATOLIA",
+          "shortDesc": "Southeastern Anatolia",
+          "title": "GÖBEKLI TEPE BURIED",
           "description": "The monumental structures at Göbekli Tepe are intentionally buried under layers of earth, preserving the site.",
           "theoretical": false,
           "details": {
             "year": "8,000 BCE",
-            "shortDesc": "Göbekli Tepe Buried",
-            "title": "ANATOLIA",
+            "shortDesc": "Southeastern Anatolia",
+            "title": "GÖBEKLI TEPE BURIED",
             "description": "The monumental structures at Göbekli Tepe are intentionally buried under layers of earth, preserving the site.",
             "details": "By about 8000 BCE Göbekli Tepe's stone enclosures were filled with soil, flint, tools and animal bones. Klaus Schmidt, who excavated the site, saw this as a deliberate burial at the end of its use. Some later excavators argue that slope erosion and collapse did part of the work.",
             "keyFigures": [],
@@ -526,14 +526,14 @@
         },
         {
           "year": "8,000 BCE",
-          "shortDesc": "Animal domestication",
-          "title": "SOUTHWEST ASIA",
+          "shortDesc": "Southwest Asia",
+          "title": "SHEEP & GOAT DOMESTICATION",
           "description": "Evidence of early domestication of sheep, goats, and other animals for food and materials",
           "theoretical": false,
           "details": {
             "year": "8000 BCE",
-            "shortDesc": "Animal domestication",
-            "title": "Southwest Asia",
+            "shortDesc": "Southwest Asia",
+            "title": "SHEEP & GOAT DOMESTICATION",
             "description": "Evidence of early domestication of sheep, goats, and other animals for food and materials",
             "details": "By 8000 BCE, there is clear evidence of morphological changes in sheep and goats indicating domestication. These animals provided reliable meat and hides. Milk came into use within a few thousand years, and wool sheep appeared later, around the 4th millennium BCE.",
             "keyFigures": [],
@@ -715,14 +715,14 @@
         },
         {
           "year": "5,400 BCE",
-          "shortDesc": "Vinča Culture",
-          "title": "EUROPE",
+          "shortDesc": "Southeast Europe",
+          "title": "VINČA CULTURE",
           "description": "Advanced Neolithic culture in Southeast Europe known for sophisticated pottery and early copper metallurgy",
           "theoretical": false,
           "details": {
             "year": "5,400 BCE",
-            "shortDesc": "Vinča Culture",
-            "title": "EUROPE",
+            "shortDesc": "Southeast Europe",
+            "title": "VINČA CULTURE",
             "description": "Advanced Neolithic culture in Southeast Europe known for sophisticated pottery and early copper metallurgy",
             "details": "The Vinča culture flourished in Serbia and neighboring countries from about 5400 to 4500 BCE, centered on Vinča-Belo Brdo near Belgrade. It is known for burnished pottery, large settlements with multi-room houses and many clay figurines. Copper slag at Belovode and Pločnik shows copper smelting from about 5000 BCE.",
             "keyFigures": [],
@@ -991,7 +991,14 @@
               "Royal tombs at Abydos"
             ]
           }
-        },
+        }
+      ]
+    },
+    {
+      "title": "BRONZE AGE CIVILIZATIONS (3,000 - 1,200 BCE)",
+      "id": "bronzeAge",
+      "theoretical": false,
+      "events": [
         {
           "year": "2,900 BCE",
           "shortDesc": "Sumerian city-states",
@@ -1021,14 +1028,7 @@
               "Stele of the Vultures"
             ]
           }
-        }
-      ]
-    },
-    {
-      "title": "BRONZE AGE CIVILIZATIONS (3,000 - 1,200 BCE)",
-      "id": "bronzeAge",
-      "theoretical": false,
-      "events": [
+        },
         {
           "year": "2,700 BCE",
           "shortDesc": "Egyptian Old Kingdom",
